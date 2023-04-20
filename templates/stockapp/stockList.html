@@ -1,0 +1,93 @@
+{% load bootstrap4 %}
+{%  load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock List</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <style>
+        body {
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+{% block content %}{% endblock %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/popper.min.js' %}"></script>
+
+<h1>Stock List</h1>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        {% for key in data.0.keys %}
+            <th>
+                {{ key }}
+                <input type="text" class="filter-input" data-filter-column="{{ key }}">
+            </th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody id="table-body">
+    {% for row in data %}
+        <tr>
+            {% for key, value in row.items %}
+                <td>
+                    {% if key == 'ts_code' %}
+                        <a href="/stock/{{ value }}">{{ value }}</a>
+                    {% else %}
+                        {{ value }}
+                    {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script>
+    $(document).ready(function () {
+        $('.filter-input').on('input', function () {
+            let filter_column = $(this).data('filter-column');
+            let filter_value = $(this).val();
+            $.ajax({
+                type: 'POST',
+                url: '/stock/filter_data/',
+                data: {
+                    'filter_column': filter_column,
+                    'filter_value': filter_value,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                dataType: 'json',
+                success: function (response) {
+                    let data = response.data;
+                    let table_body = $('#table-body');
+                    table_body.empty();
+
+                    data.forEach(function (row) {
+                        let tr = $('<tr></tr>');
+                        for (const [key, value] of Object.entries(row)) {
+                            let td = $('<td></td>');
+                            if (key === 'ts_code') {
+                                let a = $('<a></a>').attr('href', '/stock/' + value).text(value);
+                                td.append(a);
+                            } else {
+                                td.text(value);
+                            }
+                            tr.append(td);
+                        }
+                        table_body.append(tr);
+                    });
+                },
+                error: function (error) {
+                    console.error(error);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

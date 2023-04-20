@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Data</title>
+    <!-- 引入Echart库 -->
+    {#    <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>#}
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+</head>
+<body>
+<div id="main" style="width: 800px;height:600px;"></div>
+<script type="text/javascript">
+    // 获取数据
+    var data = {{ data|safe }};
+
+    // 初始化Echart实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 设置Echart选项
+    var option = {
+        title: {
+            text: 'Stock Data'
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        legend: {
+            data: ['Open', 'Close', 'High', 'Low']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: data.index
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: 'Open',
+                type: 'line',
+                data: data['open']
+            },
+            {
+                name: 'Close',
+                type: 'line',
+                data: data['close']
+            },
+            {
+                name: 'High',
+                type: 'line',
+                data: data['high']
+            },
+            {
+                name: 'Low',
+                type: 'line',
+                data: data['low']
+            }
+        ]
+    };
+
+    // 使用Echart渲染图表
+    myChart.setOption(option);
+</script>
+
+
+{#<script>#}
+{#    // Initialize the chart#}
+{#    var myChart = echarts.init(document.getElementById('myChart'));#}
+{##}
+{#    // Configure the chart options#}
+{#    var option = {#}
+{#        title: {#}
+{#            text: 'ECharts Example'#}
+{#        },#}
+{#        tooltip: {},#}
+{#        legend: {#}
+{#            data: ['Sales']#}
+{#        },#}
+{#        xAxis: {#}
+{#            data: ["Product 1", "Product 2", "Product 3", "Product 4", "Product 5", "Product 6"]#}
+{#        },#}
+{#        yAxis: {},#}
+{#        series: [{#}
+{#            name: 'Sales',#}
+{#            type: 'bar',#}
+{#            data: [5, 20, 36, 10, 10, 20]#}
+{#        }]#}
+{#    };#}
+{##}
+{#    // Set the chart options#}
+{#    myChart.setOption(option);#}
+{#</script>#}
+
+
+</body>
+</html>

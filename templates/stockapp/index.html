@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Data Visualization</title>
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+</head>
+<body>
+<form id="filter-form">
+    Stock code: <input type="text" name="stock_code" value="000001">
+    Start date: <input type="date" name="start_date" value="2021-01-01">
+    End date: <input type="date" name="end_date" value="2021-12-31">
+    Open price range: <input type="text" name="open_price_range" placeholder="e.g. 10,20">
+    Close price range: <input type="text" name="close_price_range" placeholder="e.g. 10,20">
+    Volume range: <input type="text" name="volume_range" placeholder="e.g. 10000,20000">
+    <button type="submit">Filter</button>
+</form>
+
+<div id="chart" style="width: 100%; height: 600px;"></div>
+
+<script>
+    var chart = echarts.init(document.getElementById('chart'));
+
+    function updateChart(stock_data) {
+        var option = {
+            xAxis: {
+                type: 'category',
+                data: stock_data.date
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: stock_data.close,
+                type: 'line',
+                smooth: true
+            }]
+        };
+        chart.setOption(option);
+    }
+
+    document.getElementById('filter-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        var url = new URL('/filter_stock_data/', window.location.origin);
+        var formData = new FormData(event.target);
+        for (var [key, value] of formData.entries()) {
+            url.searchParams.append(key, value);
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(updateChart);
+    });
+
+    fetch('/filter_stock_data/')
+        .then(response => response.json())
+        .then(updateChart);
+</script>
+
+</body>
+</html>
