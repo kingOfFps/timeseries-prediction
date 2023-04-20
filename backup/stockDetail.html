@@ -1,0 +1,27 @@
+{% extends 'stockapp/layout.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Detail</title>
+    <!-- Bootstrap 4 CSS -->
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+<body>
+    <h1>Stock Detail - {{ data.ts_code }}</h1>
+    <table class="table table-striped">
+        <tbody>
+            {% for key, value in data.items %}
+            <tr>
+                <th>{{ key }}</th>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/stock/" class="btn btn-primary">Back to Stock List</a>
+</body>
+</html>

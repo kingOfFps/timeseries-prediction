@@ -11,6 +11,8 @@ urlpatterns = [
     path('stock/filter_data/', views.filter_data, name='filter_data'),
     path('stock/<str:ts_code>/', views.stock_detail, name='stock_detail'),
 
+    # path("chart/list/", views.chart_list),
+    path("stock/chart/line/", views.chart_line),
     # path('filter_stock_data/', views.filter_stock_data, name='filter_stock_data'),
 ]
 #

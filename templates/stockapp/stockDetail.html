@@ -1,27 +1,111 @@
-{% load bootstrap4 %}
-{%  load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Detail</title>
-    <!-- Bootstrap 4 CSS -->
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-</head>
-<body>
+{% extends 'stockapp/layout.html' %}
+{% load static %}
+
+{% block content %}
+
     <h1>Stock Detail - {{ data.ts_code }}</h1>
     <table class="table table-striped">
         <tbody>
-            {% for key, value in data.items %}
+        {% for key, value in data.items %}
             <tr>
                 <th>{{ key }}</th>
                 <td>{{ value }}</td>
             </tr>
-            {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
     <a href="/stock/" class="btn btn-primary">Back to Stock List</a>
-</body>
-</html>
+
+
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">{{ data.name }}</div>
+            <div class="panel-body">
+                <div id="m1" style="width: 1000px; height: 500px"></div>
+            </div>
+        </div>
+{#        <div class="row">#}
+{#            <div class="col-sm-8">#}
+{#                <div class="panel panel-default">#}
+{#                    <div class="panel-heading">柱状图</div>#}
+{#                    <div class="panel-body">#}
+{#                        <div id="m2" style="width: 600px; height: 400px"></div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#            <div class="col-sm-4">#}
+{#                <div class="panel panel-default">#}
+{#                    <div class="panel-heading">饼状图</div>#}
+{#                    <div class="panel-body">#}
+{#                        Panel content#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'js/echarts.min.js' %}"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            initLine();
+        })
+
+
+
+        function initLine() {
+            var myChart = echarts.init(document.getElementById('m1'));
+            var option = {
+                title: {
+                    text: '600000.SH',
+                    left: "center",
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: [],
+                    bottom: 0
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: []
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: []
+            };
+
+
+            $.ajax({
+                url: '/stock/chart/line?ts_code={{ data.ts_code }}',
+                type: "get",
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+
+                        //console.log(res.data.x_axis)
+                        //console.log(res.data.series_list)
+
+                        option.legend.data = res.data.legend;
+                        option.xAxis.data = res.data.x_axis;
+                        option.series = res.data.series_list;
+
+                        myChart.setOption(option);
+                    }
+                }
+            })
+        }
+
+    </script>
+{% endblock %}
