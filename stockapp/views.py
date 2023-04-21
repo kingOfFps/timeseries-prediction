@@ -1,12 +1,14 @@
 import datetime
+import locale
 
+import json
 import pandas as pd
 from django.shortcuts import render
 
 # Create your views here.
 from django.shortcuts import render
 # import tushare as ts
-from . import pro,stock_df
+from . import pro, df
 import os
 
 # stockapp/views.py
@@ -14,16 +16,16 @@ from django.http import JsonResponse
 
 
 def get_filtered_stock_data(stock_code, start_date, end_date, open_price_range, close_price_range, volume_range):
-    # stock_df = ts.get_hist_data(stock_code, start=start_date, end=end_date)
-    stock_df = pro.daily(ts_code=stock_code, start_date='20190120')
+    # df = ts.get_hist_data(stock_code, start=start_date, end=end_date)
+    df = pro.daily(ts_code=stock_code, start_date='20190120')
 
     if open_price_range:
-        stock_df = stock_df[(stock_df['open'] >= open_price_range[0]) & (stock_df['open'] <= open_price_range[1])]
+        df = df[(df['open'] >= open_price_range[0]) & (df['open'] <= open_price_range[1])]
     if close_price_range:
-        stock_df = stock_df[(stock_df['close'] >= close_price_range[0]) & (stock_df['close'] <= close_price_range[1])]
+        df = df[(df['close'] >= close_price_range[0]) & (df['close'] <= close_price_range[1])]
     if volume_range:
-        stock_df = stock_df[(stock_df['volume'] >= volume_range[0]) & (stock_df['volume'] <= volume_range[1])]
-    return stock_df
+        df = df[(df['volume'] >= volume_range[0]) & (df['volume'] <= volume_range[1])]
+    return df
 
 
 def filter_stock_data(request):
@@ -50,42 +52,43 @@ def filter_stock_data(request):
 def stock_data(request):
     code = '600000.SH'
     # 获取股票数据
-    # stock_df = pro.daily_basic(ts_code=code, start_date='20190120')  这个接口积分不够，无法调用
+    # df = pro.daily_basic(ts_code=code, start_date='20190120')  这个接口积分不够，无法调用
 
-    stock_df = pro.daily(ts_code=code, start_date='20190120')
-    stock_df.to_csv(f'data/{code}.csv')
+    df = pro.daily(ts_code=code, start_date='20190120')
+
+    df.to_csv(f'data/{code}.csv',index=False)
     # 将数据传递给模板
-    context = {'data': stock_df.to_dict()}
+    context = {'data': df.to_dict()}
     return render(request, 'stockapp/stock_data.html', context)
 
 
 def get_stock_data(stock_code, start_date, end_date):
-    stock_df = pro.daily(ts_code=stock_code, start_date=start_date)
-    stock_df.to_csv(f'data/{stock_code}.csv')
-    return stock_df
+    df = pro.daily(ts_code=stock_code, start_date=start_date)
+    df.to_csv(f'data/{stock_code}.csv')
+    return df
 
 
 # def stockList(request):
 #     """当get中有筛选条件时，展示指定条件的股票列表；没有条件时，则展示所有列表"""
 #
 #     """获取所有股票的Dataframe对象"""
-#     stock_df = pd.read_csv('data/allStock.csv')
+#     df = pd.read_csv('data/allStock.csv')
 #     """按照条件进行筛选，无条件则默认给个条件或者展示所有股票列表。可供筛选的参数：
 #     ts_code    name     area industry    list_date"""
 #     # 将 request.GET 转换为字典
 #     params = dict(request.GET.items())
 #     for k, v in params.items():
 #         if k in {'ts_code','name', 'area', 'industry'}:
-#             stock_df = stock_df[stock_df[k] == v]
+#             df = df[df[k] == v]
 #
 #     if 'start_date' in params.keys():
-#         stock_df = stock_df[(stock_df['list_date'] >= int(params['start_date']))]
+#         df = df[(df['list_date'] >= int(params['start_date']))]
 #     if 'end_date' in params.keys():
-#         stock_df = stock_df[(stock_df['list_date'] <= int(params['end_date']))]
-#     columns = stock_df.columns.tolist()
+#         df = df[(df['list_date'] <= int(params['end_date']))]
+#     columns = df.columns.tolist()
 #     columns[0] = '序号'
-#     count = min(stock_df.shape[0],100)
-#     data = stock_df.iloc[:count,:].values.tolist()
+#     count = min(df.shape[0],100)
+#     data = df.iloc[:count,:].values.tolist()
 #
 #     return render(request, 'stockapp/stockList.html', {'columns': columns, 'data': data})
 #     # return render(request, 'stockapp/stockList.html', {'res': result})
@@ -93,7 +96,7 @@ def get_stock_data(stock_code, start_date, end_date):
 #     # result = {
 #     #     "status": True,
 #     #     "data": {
-#     #         'stockList': list(stock_df),
+#     #         'stockList': list(df),
 #     #     },
 #     # }
 #     # stock_code = '600000.SH'  # Example stock code
@@ -103,40 +106,33 @@ def get_stock_data(stock_code, start_date, end_date):
 #     # return render(request, 'stockapp/index.html', {'stock_data': stock_data})
 
 
-def stock_list(request):
-    """获取所有股票的Dataframe对象"""
-    count = min(stock_df.shape[0], 100)
-    data = stock_df.to_dict(orient='records')[:count]
-    return render(request, 'stockapp/stockList.html', {'data': data})
-
 def stock_detail(request, ts_code):
-    row_data = stock_df[stock_df['ts_code'] == ts_code]
+    row_data = df[df['ts_code'] == ts_code]
+    row_data.index.name = 'index'
     return render(request, 'stockapp/stockDetail.html', {'data': row_data.to_dict(orient='records')[0]})
 
-def filter_data(request):
-    if request.method == 'POST':
-        filter_column = request.POST.get('filter_column')
-        filter_value = request.POST.get('filter_value')
-        filtered_data = stock_df[stock_df[filter_column] == filter_value]
-        return JsonResponse({'data': filtered_data.to_dict(orient='records')})
-    else:
-        return JsonResponse({'error': 'Invalid request method'})
 
 def updateAllStock(request):
     """更新所有股票信息到data/allStock.csv中"""
     # 接口使用方法：https://tushare.pro/document/2?doc_id=25
     try:
         data = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
-        data.to_csv('../data/allStock.csv')
+        data.to_csv('data/allStock.csv')
         return JsonResponse({'status': True, 'msg': '更新成功'})
     except:
         return JsonResponse({'status': False, 'msg': '更新失败'})
 
 
-
 def chart_line(request):
     ts_code = request.GET.get('ts_code')
-    data = pro.daily(ts_code=ts_code, start_date='20190120')
+    start_date = request.GET.get('start_date', '20190120')  # Use a default value if not provided
+    end_date = request.GET.get('end_date', None)  # Use None if not provided
+
+    # Pass start_date and end_date to pro.daily()
+    data = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+    # 将 DataFrame 逆序,这样折线图的x（时间才是从小到大）
+    data = data.iloc[::-1]
+
     vol = data['vol'].to_list()
     amount = data['amount'].to_list()
     legend = ['volume', 'amount']
@@ -168,9 +164,75 @@ def chart_line(request):
     return JsonResponse(result)
 
 
+def stock_list(request):
+    filter_options = {
+        'area': df['area'].unique().tolist(),
+        'industry': df['industry'].unique().tolist(),
+        'market': df['market'].unique().tolist(),
+    }
+    count = min(df.shape[0], 100)
+    # data = df.to_dict(orient='records')[:count]
+    data = df.to_dict(orient='records')
+    return render(request, 'stockapp/stockList.html', {'data': data, 'filter_options': filter_options})
+
+def filter_options(request):
+    # 设置当前区域设置为中国
+    locale.setlocale(locale.LC_ALL, 'zh_CN.UTF-8')
+    # areas = sorted(list(df['area'].unique()), key=locale.strxfrm)
+    # industries = sorted(list(df['industry'].unique()), key=locale.strxfrm)
+    # markets = sorted(list(df['market'].unique()), key=locale.strxfrm)
+
+    areas = list(df['area'].dropna().unique())
+    industries = list(df['industry'].dropna().unique())
+    markets = list(df['market'].dropna().unique())
+
+    return JsonResponse({
+        'area': areas,
+        'industry': industries,
+        'market': markets
+    })
+
+# def filter_data(request):
+#     if request.method == 'POST':
+#         filters = request.POST.get('filters')
+#         filters = json.loads(filters)
+#
+#         filtered_data = df.copy()
+#         for column, value in filters.items():
+#             if value != "":
+#                 if column == 'list_date':
+#                     start_date, end_date = value.split(' - ')
+#                     filtered_data = filtered_data[
+#                         (filtered_data[column] >= start_date) & (filtered_data[column] <= end_date)]
+#                 else:
+#                     filtered_data = filtered_data[filtered_data[column] == value]
+#
+#         return JsonResponse({'data': filtered_data.to_dict(orient='records')})
+#     else:
+#         return JsonResponse({'error': 'Invalid request method'})
 
 
+def filter_data(request):
+    if request.method == 'POST':
+        filters = request.POST.get('filters')
+        filters = json.loads(filters)
 
+        filtered_data = df.copy()
+        filtered_data.dropna(inplace=True)
+        for column, value in filters.items():
+            if value:
+                if column == 'list_date':
+                    start_date, end_date = value.split(' - ')
+                    start_date = int(start_date.replace('-',''))
+                    end_date = int(end_date.replace('-',''))
+                    filtered_data = filtered_data[
+                        (filtered_data[column] >= start_date) & (filtered_data[column] <= end_date)]
+                else:
+                    filtered_data = filtered_data[filtered_data[column].str.contains(value)]
+
+        return JsonResponse({'data': filtered_data.to_dict(orient='records')})
+    else:
+        return JsonResponse({'error': 'Invalid request method'})
 
 
 """

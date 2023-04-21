@@ -1,5 +1,6 @@
-{% extends 'stockapp/layout.html' %}
 {% load static %}
+{% load bootstrap4 %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,21 +8,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Detail</title>
     <!-- Bootstrap 4 CSS -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+    <script src="{% static 'js/popper.min.js' %}"></script>
+{#    <link rel="stylesheet" type="text/css" href="{% static 'css/daterangepicker.css' %}">#}
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+ <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <style>
+        body {
+            padding: 2rem;
+        }
+
+        table {
+            width: auto;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Stock Detail - {{ data.ts_code }}</h1>
-    <table class="table table-striped">
-        <tbody>
-            {% for key, value in data.items %}
-            <tr>
-                <th>{{ key }}</th>
-                <td>{{ value }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <a href="/stock/" class="btn btn-primary">Back to Stock List</a>
+<h1>Stock Detail - {{ data.ts_code }}</h1>
+<table class="table table-striped">
+    <tbody>
+    {% for key, value in data.items %}
+        <tr>
+            <th>{{ key }}</th>
+            <td>{{ value }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="/stock/" class="btn btn-primary">Back to Stock List</a>
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-heading">{{ data.name }}</div>
+            <div class="panel-body">
+                <div id="m1" style="width: 1000px; height: 500px"></div>
+            </div>
+        </div>
+    </div>
 </body>
+
+<script src="{% static 'js/echarts.min.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+
+        initLine();
+    })
+
+
+    function initLine() {
+        var myChart = echarts.init(document.getElementById('m1'));
+        var option = {
+            title: {
+                text: '600000.SH',
+                left: "center",
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: [],
+                bottom: 0
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: []
+        };
+
+
+        $.ajax({
+            url: '/stock/chart/line?ts_code={{ data.ts_code }}',
+            type: "get",
+            dataType: "JSON",
+            success: function (res) {
+                if (res.status) {
+                    option.legend.data = res.data.legend;
+                    option.xAxis.data = res.data.x_axis;
+                    option.series = res.data.series_list;
+
+                    myChart.setOption(option);
+                }
+            }
+        })
+    }
+
+</script>
+
 </html>
+
+
+
+
+
+

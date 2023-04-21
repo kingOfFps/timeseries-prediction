@@ -1,102 +1,165 @@
-{% extends 'stockapp/layout.html' %}
 {% load static %}
+{% load bootstrap4 %}
 
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stock detail</title>
+    <!-- Bootstrap 4 CSS -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    {#    <link rel="stylesheet" type="text/css" href="{% static 'css/daterangepicker.css' %}">#}
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <style>
+        body {
+            padding: 2rem;
+        }
 
-    <h1>Stock Detail - {{ data.ts_code }}</h1>
-    <table class="table table-striped">
-        <tbody>
-        {% for key, value in data.items %}
-            <tr>
-                <th>{{ key }}</th>
-                <td>{{ value }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <a href="/stock/" class="btn btn-primary">Back to Stock List</a>
+        table {
+            width: auto;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<h1>{{ data.name }} - {{ data.ts_code }}</h1>
+<table class="table table-striped">
+    <tbody>
+    {% for key, value in data.items %}
+        <tr>
+            <th>{{ key }}</th>
+            <td>{{ value }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="/stock/" class="btn btn-primary">Back to Stock List</a>
 
-
-    <div class="container">
-        <div class="panel panel-default">
-            <div class="panel-heading">{{ data.name }}</div>
-            <div class="panel-body">
-                <div id="m1" style="width: 1000px; height: 500px"></div>
-            </div>
+<!-- Add this code snippet after the <a href="/stock/" class="btn btn-primary">Back to Stock List</a> line -->
+<div class="container mt-3" style="margin-bottom: 50px">
+    <div class="row">
+        <div class="col-md-4">
+            <input type="text" id="start-date" class="form-control" value="20130120">
         </div>
-{#        <div class="row">#}
-{#            <div class="col-sm-8">#}
-{#                <div class="panel panel-default">#}
-{#                    <div class="panel-heading">柱状图</div>#}
-{#                    <div class="panel-body">#}
-{#                        <div id="m2" style="width: 600px; height: 400px"></div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#            <div class="col-sm-4">#}
-{#                <div class="panel panel-default">#}
-{#                    <div class="panel-heading">饼状图</div>#}
-{#                    <div class="panel-body">#}
-{#                        Panel content#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
+        <div class="col-md-4">
+            <input type="text" id="end-date" class="form-control" placeholder="End Date (YYYY-MM-DD) " value="20230120">
+        </div>
+        <div class="col-md-4">
+            <button id="update-chart" class="btn btn-primary">Update Chart</button>
+        </div>
     </div>
+</div>
 
-{% endblock %}
 
-{% block js %}
-    <script src="{% static 'js/echarts.min.js' %}"></script>
-    <script type="text/javascript">
-        $(function () {
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading"
+             style="font-size: 30px; text-align: center; margin-right: 110px">{{ data.name }}</div>
+        <div class="panel-body">
+            <div id="m1" style="width: 1000px; height: 500px"></div>
+        </div>
+    </div>
+</div>
+</body>
 
-            initLine();
+<script src="{% static 'js/echarts.min.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+
+        initLine();
+
+    })
+
+    function initOption() {
+        var option = {
+
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: [],
+                bottom: 0
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: []
+        };
+        return option;
+    }
+
+    function initLine() {
+        var myChart = echarts.init(document.getElementById('m1'));
+        var option = initOption();
+
+        $.ajax({
+            url: '/stock/chart/line?ts_code={{ data.ts_code }}',
+            type: "get",
+            dataType: "JSON",
+            success: function (res) {
+                if (res.status) {
+                    option.legend.data = res.data.legend;
+                    option.xAxis.data = res.data.x_axis;
+                    option.series = res.data.series_list;
+
+                    myChart.setOption(option);
+                }
+            }
         })
+    }
 
+    // Add this code snippet after the initLine() function in your JavaScript code
+    $(document).ready(function () {
+        $('#update-chart').on('click', function () {
+            var startDate = $('#start-date').val();
+            var endDate = $('#end-date').val();
 
+            // Validate the date format
+            {#var datePattern = /^\d{4}-\d{2}-\d{2}$/;#}
+            {#if (!startDate.match(datePattern) || !endDate.match(datePattern)) {#}
+            {#    alert("Invalid date format. Please enter date in YYYY-MM-DD format.");#}
+            {#    return;#}
+            {#}#}
 
-        function initLine() {
+                updateLine(startDate, endDate);
+
+            }
+        )
+            ;
+        });
+
+        function updateLine(startDate, endDate) {
+            // ... (existing code)
+
+            var queryString = '?ts_code={{ data.ts_code }}';
+            if (startDate && endDate) {
+                queryString += '&start_date=' + startDate + '&end_date=' + endDate;
+            }
+            var option = initOption();
             var myChart = echarts.init(document.getElementById('m1'));
-            var option = {
-                title: {
-                    text: '600000.SH',
-                    left: "center",
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: [],
-                    bottom: 0
-                },
-                toolbox: {
-                    feature: {
-                        saveAsImage: {}
-                    }
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: []
-                },
-                yAxis: {
-                    type: 'value'
-                },
-                series: []
-            };
-
 
             $.ajax({
-                url: '/stock/chart/line?ts_code={{ data.ts_code }}',
+                url: '/stock/chart/line' + queryString,
                 type: "get",
                 dataType: "JSON",
+                // ... (existing code)
                 success: function (res) {
                     if (res.status) {
-
-                        //console.log(res.data.x_axis)
-                        //console.log(res.data.series_list)
-
                         option.legend.data = res.data.legend;
                         option.xAxis.data = res.data.x_axis;
                         option.series = res.data.series_list;
@@ -104,8 +167,16 @@
                         myChart.setOption(option);
                     }
                 }
-            })
+            });
         }
 
-    </script>
-{% endblock %}
+
+</script>
+
+</html>
+
+
+
+
+
+

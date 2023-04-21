@@ -10,6 +10,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Detail</title>
     <!-- Bootstrap 4 CSS -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     {% block css %}{% endblock %}
@@ -59,7 +61,6 @@
     {% block content %}{% endblock %}
 </div>
 
-<script src="{% static 'js/jquery.min.js' %}"></script>
 {#<script src="{% static 'plugins/bootstrap_3.4.1_dist/js/bootstrap.min.js' %}"></script>#}
 {% block js %}{% endblock %}
 </body>
