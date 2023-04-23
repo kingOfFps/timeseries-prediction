@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.shortcuts import render
 # import tushare as ts
 from . import pro, df
+from stockapp.calculate_indicators import *
 import os
 
 # stockapp/views.py
@@ -133,23 +134,50 @@ def chart_line(request):
     # 将 DataFrame 逆序,这样折线图的x（时间才是从小到大）
     data = data.iloc[::-1]
 
-    vol = data['vol'].to_list()
-    amount = data['amount'].to_list()
-    legend = ['volume', 'amount']
+    # vol = data['vol'].to_list()
+    # amount = data['amount'].to_list()
+    # legend = ['volume', 'amount']
+    # series_list = [
+    #     {
+    #         "name": 'volume',
+    #         "type": 'line',
+    #         "stack": 'Total',
+    #         'smooth': True,
+    #         "data": vol,
+    #     },
+    #     {
+    #         "name": 'amount',
+    #         "type": 'line',
+    #         "stack": 'Total',
+    #         "data": amount,
+    #     }
+    # ]
+    data = calculate_main(data)
+    # k, d, j = KDJ(data)
+    # wr = W_And_M(data)
+    # rsi = RSI(data)
+    # plus_di, minus_di, adx = DMI(data)
+    # bias = BIAS(data)
+    # obv = OBV(data)
+    # ma, up, down = BOLL(data)
+    # legend = ['MACD','MACD-signal_line','MACD-histogram','KDJ-K','KDJ-D','KDJ-J','W&M','RSI','PLUS-DMI','MINUS-DMI','ADX-DMI','BIAS','BOLL-MA','BOLL-UP','BOLL-DOWN']
+    legend = ['MACD', 'MACD-signal_line', 'MACD-histogram','KDJ-K','KDJ-D','KDJ-J','W&M','RSI','BIAS','BOLL-MA','BOLL-UP','BOLL-DOWN']
     series_list = [
-        {
-            "name": 'volume',
-            "type": 'line',
-            "stack": 'Total',
-            'smooth': True,
-            "data": vol,
-        },
-        {
-            "name": 'amount',
-            "type": 'line',
-            "stack": 'Total',
-            "data": amount,
-        }
+        {"name": 'MACD', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['MACD'].to_list(), },
+        {"name": 'MACD-signal_line', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['Signal_Line'].to_list(), },
+        {"name": 'MACD-histogram', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['Histogram'].to_list(), },
+        {"name": 'KDJ-K', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['K'].to_list(), },
+        {"name": 'KDJ-D', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['D'].to_list(), },
+        {"name": 'KDJ-J', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['J'].to_list(), },
+        {"name": 'W&M', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['Williams_%R'].to_list(), },
+        {"name": 'RSI', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['RSI'].to_list(), },
+        # {"name": 'PLUS-DMI', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['DI+'].to_List(), },
+        # {"name": 'MINUS-DMI', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['DI-'].to_list(), },
+        # {"name": 'ADX-DMI', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['ADX'].to_list(), },
+        {"name": 'BIAS', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['BIAS'].to_list(), },
+        {"name": 'BOLL-MA', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['BOLL'].to_list(), },
+        {"name": 'BOLL-UP', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['BOLL_UPPER'].to_list(), },
+        {"name": 'BOLL-DOWN', "type": 'line', "stack": 'Total', 'smooth': True, "data": data['BOLL_LOWER'].to_list(), },
     ]
     x_axis = data['trade_date'].to_list()
 
