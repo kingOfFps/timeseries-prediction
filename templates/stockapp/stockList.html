@@ -21,6 +21,19 @@
     <script type="text/javascript"
             src="https://cdn.jsdelivr.net/npm/bootstrap-daterangepicker@3.1.0/daterangepicker.js"></script>
     <style>
+        .custom-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: auto;
+        }
+
+
+        .centered-title {
+            width: 100%;
+            text-align: center;
+        }
+
         body {
             padding: 2rem;
         }
@@ -39,12 +52,27 @@
         table {
             margin: 2rem auto;
         }
+
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .page-item {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1 class="text-center">Stock List</h1>
+    <div class="custom-header">
+        <h1 class="centered-title">股票列表</h1>
+        <button id="custom-action-button" class="btn btn-primary">更新股票(耗时)</button>
+
+    </div>
+    <br>
     <div class="filter-container">
+
         <input type="text" id="name-filter" class="filter form-control" placeholder="Name">
         <select id="area-filter" class="filter form-control">
             <option value="">Area</option>
@@ -55,8 +83,12 @@
         <select id="market-filter" class="filter form-control">
             <option value="">Market</option>
         </select>
+
         <input type="text" id="list-date-filter" class="filter form-control" placeholder="List Date Range">
+
     </div>
+
+
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
         <tr>
@@ -81,7 +113,63 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <br/><br/>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            {% if data.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ data.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&lsaquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                </li>
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&lsaquo;</a>
+                </li>
+            {% endif %}
+
+            {% for i in data.paginator.page_range %}
+                {% if data.number == i %}
+                    <li class="page-item active"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if data.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ data.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&rsaquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ data.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&rsaquo;</a>
+                </li>
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
 </div>
+
+
 <script>
     function updateTable(data) {
         let table_body = $('#table-body');
@@ -151,20 +239,38 @@
                         return $('<option></option>').val(item).text(item);
                     }));
                 },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.error('Error: ' + textStatus + ', ' + errorThrown);
-            }
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error: ' + textStatus + ', ' + errorThrown);
+                }
 
             }
         )
         ;
     }
 
+    function performCustomAction() {
+        $.ajax({
+            type: 'GET',
+            url: '/stock/actions/updateAllStock/',
+            dataType: 'json',
+            success: function (response) {
+                // 根据您的需求处理响应数据，例如更新表格等
+                console.log(response);
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+
     $(document).ready(function () {
         $('.filter').on('change', function () {
             filterData();
         });
-
+        // 绑定按钮点击事件
+        $('#custom-action-button').on('click', function () {
+            performCustomAction();
+        });
         $('#list-date-filter').daterangepicker({
             autoUpdateInput: false,
             locale: {

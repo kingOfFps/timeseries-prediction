@@ -55,7 +55,7 @@ def prepare_y(y, stepIn, stepOut):
     for i in range(y.shape[0] - stepIn - stepOut):
         """用x[i]~x[i+step-1]来预测y[i+step]"""
         newX.append(y[i:i + stepIn])
-        newy.append(y[i + stepIn:i + stepIn + stepOut])
+        newy.append(y[i + stepIn:i + stepIn + stepOut,-1])
     return np.array(newX), np.array(newy)
 
 # 把数据集切分成训练集，测试集

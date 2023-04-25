@@ -93,41 +93,41 @@ def RSI(data, n=14):
     return data
 
 
-# def DMI(data, n=14, m=14):
-#     """
-#     计算DMI指标。
-#     :param data: 包含价格数据的dataframe，必须包含'High'、'Low'、'Close'列。
-#     :param n: 计算DMI指标所需的时间窗口长度。
-#     :param m: 计算DMI指标的平滑因子的时间窗口长度。
-#     :return: 包含DMI指标和ADX指标的dataframe。
-#     """
-#     high = data['high']
-#     low = data['low']
-#     close = data['close']
-#     tr = pd.DataFrame(np.zeros_like(close), index=data.index, columns=['TR'])
-#     tr['H-L'] = abs(high - low)
-#     tr['H-PC'] = abs(high - close.shift(1))
-#     tr['L-PC'] = abs(low - close.shift(1))
-#     tr['TR'] = tr[['H-L', 'H-PC', 'L-PC']].max(axis=1)
-#     atr = tr['TR'].rolling(n).mean()
-#     up = high.diff()
-#     down = low.diff()
-#     plus_dm = pd.DataFrame(np.zeros_like(close), index=data.index, columns=['+DM'])
-#     plus_dm[(up > 0) & (up > down)] = up
-#     minus_dm = pd.DataFrame(np.zeros_like(close), index=data.index, columns=['-DM'])
-#     minus_dm[(down > 0) & (down > up)] = down
-#     plus_di = 100 * plus_dm['+DM'].rolling(n).sum() / atr
-#     minus_di = 100 * minus_dm['-DM'].rolling(n).sum() / atr
-#     dx = 100 * abs(plus_di - minus_di) / (plus_di + minus_di)
-#     adx = dx.ewm(alpha=1/m, min_periods=m).mean()
-#     data['DI+'] = plus_di
-#     data['DI+'].fillna(method='bfill', inplace=True)
-#     data['DI-'] = minus_di
-#     data['DI-'].fillna(method='bfill', inplace=True)
-#     data['ADX'] = adx
-#     data['ADX'].fillna(method='bfill', inplace=True)
-#
-#     return data
+def DMI(data, n=14, m=14):
+    """
+    计算DMI指标。
+    :param data: 包含价格数据的dataframe，必须包含'High'、'Low'、'Close'列。
+    :param n: 计算DMI指标所需的时间窗口长度。
+    :param m: 计算DMI指标的平滑因子的时间窗口长度。
+    :return: 包含DMI指标和ADX指标的dataframe。
+    """
+    high = data['high']
+    low = data['low']
+    close = data['close']
+    tr = pd.DataFrame(np.zeros_like(close), index=data.index, columns=['TR'])
+    tr['H-L'] = abs(high - low)
+    tr['H-PC'] = abs(high - close.shift(1))
+    tr['L-PC'] = abs(low - close.shift(1))
+    tr['TR'] = tr[['H-L', 'H-PC', 'L-PC']].max(axis=1)
+    atr = tr['TR'].rolling(n).mean()
+    up = high.diff()
+    down = low.diff()
+    plus_dm = pd.DataFrame(np.zeros_like(close), index=data.index, columns=['+DM'])
+    plus_dm[(up > 0) & (up > down)] = up
+    minus_dm = pd.DataFrame(np.zeros_like(close), index=data.index, columns=['-DM'])
+    minus_dm[(down > 0) & (down > up)] = down
+    plus_di = 100 * plus_dm['+DM'].rolling(n).sum() / atr
+    minus_di = 100 * minus_dm['-DM'].rolling(n).sum() / atr
+    dx = 100 * abs(plus_di - minus_di) / (plus_di + minus_di)
+    adx = dx.ewm(alpha=1/m, min_periods=m).mean()
+    data['DI+'] = plus_di
+    data['DI+'].fillna(method='bfill', inplace=True)
+    data['DI-'] = minus_di
+    data['DI-'].fillna(method='bfill', inplace=True)
+    data['ADX'] = adx
+    data['ADX'].fillna(method='bfill', inplace=True)
+
+    return data
 
 
 def BIAS(data, n=6):

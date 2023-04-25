@@ -6,13 +6,20 @@ from . import views
 urlpatterns = [
     # url(r'^stock/$', views.stockList, name='stockList'),
     # url(r'^stock/(?P<stock_id>\d+)/$', views.stockDetail, name='stockDetail'),
+    # path('filter_stock_data/', views.filter_stock_data, name='filter_stock_data'),
 
     path('stock/', views.stock_list, name='stock_list'),
     path('stock/filter_data/', views.filter_data, name='filter_data'),
     path('stock/filter_options/', views.filter_options, name='filter_options'),
-    path('stock/<str:ts_code>/', views.stock_detail, name='stock_detail'),
+
     path("stock/chart/line/", views.chart_line),
-    # path('filter_stock_data/', views.filter_stock_data, name='filter_stock_data'),
+
+    path("stock/actions/updateAllStock/", views.updateAllStock),
+    path("stock/actions/predict/", views.predict),
+
+    path('stock/<str:ts_code>/', views.stock_detail, name='stock_detail'),
+
+
 ]
 
 

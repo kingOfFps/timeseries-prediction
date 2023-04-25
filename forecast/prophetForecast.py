@@ -22,11 +22,41 @@ def forecast(data, steps_to_predict):
     return predictions
 
 if __name__ == "__main__":
-    n_step = 50
-    data = pd.read_csv('../data/600000.SH.csv')
+    n_step = 7
+    count = 200
+    data = pd.read_csv('../data/000001.SZ.csv').iloc[:count, :]
+    # 将data反转，使其按照时间顺序排列
+    data = data.iloc[::-1]
+
     train_data = data.iloc[:-n_step, :]
     test_data = data.iloc[-n_step:, :]
     pred = forecast(train_data, n_step)
-
+    print(count)
     evaluate(test_data['close'], pred['yhat'])
     showTruePred(test_data['close'], pred['yhat'])
+
+
+"""
+14
+
+100
+Test RMSE: 1.38
+Test MAPE: 8.11
+皮尔森系数0.22
+决定系数-41.05
+150
+Test RMSE: 0.46
+Test MAPE: 3.09
+皮尔森系数0.15
+决定系数-3.74
+200
+Test RMSE: 0.4
+Test MAPE: 2.46
+皮尔森系数0.09
+决定系数-2.48
+300
+Test RMSE: 0.54
+Test MAPE: 3.96
+皮尔森系数0.37
+决定系数-5.36
+"""

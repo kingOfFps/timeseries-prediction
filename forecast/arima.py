@@ -30,8 +30,8 @@ def forecast(data,n_step):
     return pred
 
 if __name__ == "__main__":
-    n_step = 15
-    data = pd.read_csv('../data/600000.SH.csv')
+    n_step = 7
+    data = pd.read_csv('../data/000001.SZ.csv')
     train_data = data.iloc[:-n_step, :]
     test_data = data.iloc[-n_step:, :]
     pred = forecast(train_data['close'], n_step)

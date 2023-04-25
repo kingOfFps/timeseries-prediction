@@ -43,13 +43,13 @@
 <!-- Add this code snippet after the <a href="/stock/" class="btn btn-primary">Back to Stock List</a> line -->
 <div class="container mt-3" style="margin-bottom: 50px">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4" style="display: inline-block">
             <input type="text" id="start-date" class="form-control" value="20130120">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" style="display: inline-block">
             <input type="text" id="end-date" class="form-control" placeholder="End Date (YYYY-MM-DD) " value="20230120">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4" style="display: inline-block">
             <button id="update-chart" class="btn btn-primary">Update Chart</button>
         </div>
     </div>
@@ -57,33 +57,74 @@
 
 
 <div class="container">
-    <div class="panel panel-default">
+    <div class="panel panel-default" style="margin-bottom: 50px">
         <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px">{{ data.name }}</div>
-        <div class="panel-body">
-            <div id="m1" style="width: 1000px; height: 500px"></div>
-        </div>
-    </div>
-
-    <div class="panel panel-default">
-        <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px">{{ data.name }}</div>
-        <div class="panel-body">
-            <div id="m2" style="width: 1000px; height: 500px"></div>
+             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">{{ data.name }}</div>
+        <div class="panel-body" style="margin-top: 0px">
+            <div id="chart_region" style="width: 1000px; height: 400px"></div>
         </div>
     </div>
 </div>
+
+<div class="container">
+    <div class="panel panel-default" style="margin-bottom: 50px">
+        <div class="panel-heading"
+             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">MACD</div>
+        <div class="panel-body" style="margin-top: 0px">
+            <div id="chart_macd" style="width: 1000px; height: 500px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="panel panel-default" style="margin-bottom: 50px">
+        <div class="panel-heading"
+             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">KDJ</div>
+        <div class="panel-body" style="margin-top: 0px">
+            <div id="chart_kdj" style="width: 1000px; height: 500px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="panel panel-default" style="margin-bottom: 50px">
+        <div class="panel-heading"
+             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">W&M</div>
+        <div class="panel-body" style="margin-top: 0px">
+            <div id="chart_wm" style="width: 1000px; height: 500px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="panel panel-default" style="margin-bottom: 50px">
+        <div class="panel-heading"
+             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BIAS</div>
+        <div class="panel-body" style="margin-top: 0px">
+            <div id="chart_bias" style="width: 1000px; height: 500px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="panel panel-default" style="margin-bottom: 50px">
+        <div class="panel-heading"
+             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BOLL</div>
+        <div class="panel-body" style="margin-top: 0px">
+            <div id="chart_boll" style="width: 1000px; height: 500px"></div>
+        </div>
+    </div>
+</div>
+
 </body>
 
 <script src="{% static 'js/echarts.min.js' %}"></script>
 <script type="text/javascript">
     $(function () {
-
         initLine();
-
     })
 
-    function initOption() {
+    function regionOption() {
         var option = {
 
             tooltip: {
@@ -91,7 +132,44 @@
             },
             legend: {
                 data: [],
-                bottom: 0
+                bottom: 0,
+                selected: {
+                    'open': true,
+                    'high': false,
+                    'low': false,
+                    'close': true,
+                    'change': false,
+                    'vol': false,
+                    'amount': false,
+                }
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: []
+        };
+        return option;
+    }
+
+    function indicatorsOption() {
+        var option = {
+
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: [],
+                bottom: 0,
             },
             toolbox: {
                 feature: {
@@ -112,8 +190,23 @@
     }
 
     function initLine() {
-        var myChart = echarts.init(document.getElementById('m1'));
-        var option = initOption();
+        var chart_region= echarts.init(document.getElementById('chart_region'));
+        var chart_macd = echarts.init(document.getElementById('chart_macd'));
+        var chart_kdj = echarts.init(document.getElementById('chart_kdj'));
+        var chart_wm = echarts.init(document.getElementById('chart_wm'));
+        //var chart_rsi = echarts.init(document.getElementById('chart_rsi'));
+        //var chart_dmi = echarts.init(document.getElementById('chart_dmi'));
+        var chart_bias = echarts.init(document.getElementById('chart_bias'));
+        var chart_boll = echarts.init(document.getElementById('chart_boll'));
+
+        var option_region = regionOption();
+        var option_macd = indicatorsOption();
+        var option_kdj = indicatorsOption();
+        var option_wm = indicatorsOption();
+        //var option_rsi = indicatorsOption();
+        //var option_dmi = indicatorsOption();
+        var option_bias = indicatorsOption();
+        var option_boll = indicatorsOption();
 
         $.ajax({
             url: '/stock/chart/line?ts_code={{ data.ts_code }}',
@@ -121,11 +214,56 @@
             dataType: "JSON",
             success: function (res) {
                 if (res.status) {
-                    option.legend.data = res.data.legend;
-                    option.xAxis.data = res.data.x_axis;
-                    option.series = res.data.series_list;
+                    // 原始的开盘价,最高价,最低价,收盘价,当天变化,成交量,成交额
+                    option_region.legend.data = res.data.legend.slice(0, 7);
+                    option_region.xAxis.data = res.data.x_axis;
+                    option_region.series = res.data.series_list.slice(0, 7);
 
-                    myChart.setOption(option);
+                    //MACD 各指标线
+                    option_macd.legend.data = res.data.legend.slice(7, 10);
+                    option_macd.xAxis.data = res.data.x_axis;
+                    option_macd.series = res.data.series_list.slice(7, 10);
+
+                    //KDJ 各指标线
+                    option_kdj.legend.data = res.data.legend.slice(10, 13);
+                    option_kdj.xAxis.data = res.data.x_axis;
+                    option_kdj.series = res.data.series_list.slice(10, 13);
+
+                    //W&M 指标线
+                    option_wm.legend.data = res.data.legend.slice(13, 14);
+                    option_wm.xAxis.data = res.data.x_axis;
+                    option_wm.series = res.data.series_list.slice(13, 14);
+
+                    // RSI 指标线
+                    //option_wm.legend.data = res.data.legend.slice(14, 15);
+                    //option_wm.xAxis.data = res.data.x_axis;
+                    //option_wm.series = res.data.series_list.slice(14, 15);
+
+                    // DMI 指标线
+                    //option_dmi.legend.data = res.data.legend.slice(15, 18);
+                    //option_dmi.xAxis.data = res.data.x_axis;
+                    //option_dmi.series = res.data.series_list.slice(15, 18);
+
+                    // BIAS 指标线
+                    option_bias.legend.data = res.data.legend.slice(15, 16);
+                    option_bias.xAxis.data = res.data.x_axis;
+                    option_bias.series = res.data.series_list.slice(15, 16);
+
+                    //BOLL指标线
+                    option_boll.legend.data = res.data.legend.slice(16);
+                    option_boll.xAxis.data = res.data.x_axis;
+                    option_boll.series = res.data.series_list.slice(16);
+
+
+                    chart_region.setOption(option_region);
+                    chart_macd.setOption(option_macd);
+                    chart_kdj.setOption(option_kdj);
+                    chart_wm.setOption(option_wm);
+                    //chart_rsi.setOption(option_rsi);
+                    //chart_dmi.setOption(option_dmi);
+                    chart_bias.setOption(option_bias);
+                    chart_boll.setOption(option_boll);
+
                 }
             }
         })

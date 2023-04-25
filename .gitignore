@@ -1,0 +1,40 @@
+# ---> Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.h5
+*.model
+*.pkl
+*.csv
+*.xlsx
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+
+
+/test
+
+/data/
+/model/
+/save_features/
+/backup/
+
+*.csv
+*.h5
+*.xlsx
+
+
+
+
+
+
+
