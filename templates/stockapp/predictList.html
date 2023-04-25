@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>预测股票收益</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">预测股票收益</h1>
+        <table class="table table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">股票代码</th>
+                    <th scope="col">名称</th>
+                    <th scope="col">开盘价</th>
+                    <th scope="col">预测收盘价</th>
+                    <th scope="col">收益</th>
+                    <th scope="col">变化百分比</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in data %}
+                    <tr>
+                        <td>{{ result.ts_code }}</td>
+                        <td>{{ result.name }}</td>
+                        <td>{{ result.open }}</td>
+                        <td>{{ result.close }}</td>
+                        <td>{{ result.earn }}</td>
+                        <td>{{ result.change }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    <a href="/stock/" class="btn btn-primary">返回主页面</a>
+
+    </div>
+</body>
+</html>

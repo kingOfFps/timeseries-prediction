@@ -55,8 +55,9 @@ def forecast(data, n_step):
     model.compile(loss='mean_squared_error', optimizer='adam')
 
     # 训练模型
-    history = model.fit(X_train, y_train, epochs=30, batch_size=128, verbose=0, validation_data=(X_train, y_train))
-    showTrain(history)
+    history = model.fit(X_train, y_train, epochs=20, batch_size=512, verbose=0, validation_data=(X_train, y_train))
+    # showTrain(history)
+    print('训练完毕')
 
     # 预测
     # input_data = features_scaled[-look_back:]
@@ -68,7 +69,7 @@ def forecast(data, n_step):
     predictions = np.array(predictions).reshape(-1, 1)
     # predictions = scaler.inverse_transform(np.insert(predictions, [0] * (data.shape[1]-1), 0, axis=1))[:, close_column_index]
     predictions = scaler_y.inverse_transform(predictions)
-
+    print('预测完毕')
     return predictions
 
 

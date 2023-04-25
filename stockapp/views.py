@@ -1,3 +1,5 @@
+import time
+
 from django.core.paginator import Paginator
 import datetime
 import locale
@@ -26,7 +28,7 @@ def updateAllStock(request):
     # 先更新所有股票的简要信息（allStock.csv），在根据allStock.csv中的ts_code挨个去更行 ts_code.csv，也就是股票的详细信息
     df = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
     # 给股票的简要信息添加如下几列
-    for col_name in add_list:
+    for col_name in config['add_list']:
         df[col_name] = None
 
     # for ts_code in df['ts_code'].to_list():
@@ -36,7 +38,7 @@ def updateAllStock(request):
         # 将ts_code.csv的详情数据添加到allStock.csv中
         if data.shape[0] < 1:
             continue
-        for col_name in add_list:
+        for col_name in config['add_list']:
             if col_name in data.columns:
                 df.loc[df['ts_code'] == ts_code, col_name] = data.loc[0, col_name]
     df.to_csv('data/allStock.csv')
@@ -131,7 +133,7 @@ def stock_list(request):
     }
     data = df.to_dict(orient='records')
     # 创建分页器
-    paginator = Paginator(data, page_num)
+    paginator = Paginator(data, config['page_num'])
     # 从请求中获取页码
     page = request.GET.get('page', 1)
     # 获取当前页的数据
@@ -173,7 +175,7 @@ def filter_data(request):
                     filtered_data = filtered_data[filtered_data[column].str.contains(value)]
         data = filtered_data.to_dict(orient='records')
         # 创建分页器
-        paginator = Paginator(data, page_num)
+        paginator = Paginator(data, config['page_num'])
         # 从请求中获取页码
         page = request.GET.get('page', 1)
         # 获取当前页的数据
@@ -200,38 +202,74 @@ def filter_data(request):
 def trainLR(request):
     """针对allStock.csv的前面100支股票的历史数据，训练其对应的线性回归模型"""
 
-    for ts_code in df.loc[:stock_count, 'ts_code'].to_list():
+    for ts_code in df.loc[:config['stock_count'], 'ts_code'].to_list():
         pass
 
 
 def predict(request):
-    ts_code = request.GET.get('ts_code')
+    """在线预测allStock.csv中的前{stock_count}支股票的{n_step}后的收盘价，
+    将每只股票的预测的收盘价-现在的开盘价存入result_list中，就能得到这些股票的收益了"""
+    start_time = time.time()
     # 预测的天数
-    n_step = request.GET.get('n_step')
-    data = pro.daily(ts_code=ts_code)
-    X = data[['close']][-n_step:]
-    path = f'forecast/model/linearRegression.pkl'
-    model = joblib.load(path)
-    result = linearRegression.predict(model, X=X, window_size=7)
+    n_step = request.GET.get('n_step', 5)
+    if n_step == '' or n_step is None:
+        n_step = 3
+    n_step = int(n_step)
+
+    results = []
+    for ts_code in df.loc[:config['stock_count'], 'ts_code'].to_list():
+        dic = {'ts_code': None, 'name': None, 'open': None, 'close': None, 'change': None, 'earn': None}
+        data = pd.read_csv(f'../data/{ts_code}.csv')
+        count = min(config['predict_count'], data.shape[0])
+        # 获取部分数据并反转顺序
+        data = data.iloc[:count, :].iloc[::-1]
+        pred = lstm.forecast(data, n_step)
+        # 将股票数据序列化到字典中
+        close = float(pred[-1])
+        open = data['open'].iloc[-1]
+        earn = close - open
+        change = '%.4f' % (earn / open * 100)
+
+        dic['ts_code'] = ts_code
+        dic['name'] = df.loc[df['ts_code'] == ts_code, 'name'].iloc[0]
+        dic['open'] = open
+        dic['close'] = "%.4f" % close
+        dic['earn'] = "%.4f" % earn
+        dic['change'] = f"{change}%"
+        results.append(dic)
+    results = sorted(results, key=lambda x: float(x['earn']), reverse=True)
+    print(f'预测花费{time.time()-start_time}')
+    return render(request, 'stockapp/predictList.html', {'data': results})
+    # return JsonResponse({'data': results})
 
 
 def predictOnline(request):
     """在线预测allStock.csv中的前{stock_count}支股票的{n_step}后的收盘价，
     将每只股票的预测的收盘价-现在的开盘价存入result_list中，就能得到这些股票的收益了"""
-    from . import count
-    result_list = []
-    for ts_code in df.loc[:stock_count, 'ts_code'].to_list():
-        data = pd.read_csv('../data/000001.SZ.csv')
-        count = min(count, data.shape[0])
-        data = pd.read_csv('../data/000001.SZ.csv').iloc[:count, :]
-
     # 预测的天数
-    n_step = request.GET.get('n_step')
-    data = pro.daily(ts_code=ts_code)
-    X = data[['close']][-n_step:]
-    path = f'forecast/model/linearRegression.pkl'
-    model = joblib.load(path)
-    result = linearRegression.predict(model, X=X, window_size=7)
+    n_step = request.GET.get('n_step', 5)
+    if n_step == '' or n_step is None:
+        n_step = 5
+    n_step = int(n_step)
+
+    results = []
+    for ts_code in df.loc[:config['stock_count'], 'ts_code'].to_list():
+        dic = {'ts_code': None, 'name': None, 'open': None, 'close': None, 'change': None, 'earn': None}
+        data = pd.read_csv(f'../data/{ts_code}.csv')
+        count = min(config['predict_count'], data.shape[0])
+        # 获取部分数据并反转顺序
+        data = data.iloc[:count, :].iloc[::-1]
+        pred = lstm.forecast(data, n_step)
+        # 将股票数据序列化到字典中
+        dic['ts_code'] = ts_code
+        dic['name'] = df.loc[df['ts_code'] == ts_code, 'name'].iloc[0]
+        dic['open'] = data['open'].iloc[-1]
+        dic['close'] = pred[-1]
+        dic['earn'] = dic['close'] - dic['open']
+        dic['change'] = f"{dic['earn'] / dic['open'] * 100}%"
+        results.append(dic)
+    print(results)
+    return render(request, 'stockapp/predictList.html', {'data': results})
 
 
 """

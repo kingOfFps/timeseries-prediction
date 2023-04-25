@@ -21,13 +21,28 @@
     <script type="text/javascript"
             src="https://cdn.jsdelivr.net/npm/bootstrap-daterangepicker@3.1.0/daterangepicker.js"></script>
     <style>
+        .input-button-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .custom-input-width {
+            width: 550px;
+        }
+
         .custom-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             height: auto;
+            margin-bottom: 1rem;
         }
 
+        .custom-header > * {
+            flex: 1;
+        }
 
         .centered-title {
             width: 100%;
@@ -65,12 +80,25 @@
 </head>
 <body>
 <div class="container">
-    <div class="custom-header">
-        <h1 class="centered-title">股票列表</h1>
-        <button id="custom-action-button" class="btn btn-primary">更新股票(耗时)</button>
+    {#    <div class="custom-header">#}
+    {#        <h1 class="centered-title">股票列表</h1>#}
+    {#        <button id="custom-action-button" class="btn btn-primary">更新股票(耗时)</button>#}
+    {#        <button id="predict-action-button" class="btn btn-primary">预测股票(耗时)</button>#}
+    {##}
+    {#    </div>#}
+    <div class="input-button-container">
+        <input type="text" id="custom-input" class="form-control custom-input-width"
+               placeholder="输入预测天数(不要超过7，否则效果差。且预测和更新都非常耗时)" value=3>
+        {#        <a href="/stock/" class="btn btn-primary">Back to Stock List</a>#}
+
+        <button id="predict-stock-button" class="btn btn-dark">预测股票</button>
+{#        <button id="predict-stock-button" class="btn btn-dark"><a href="/stock/actions/predict">预测股票</a></button>#}
+        <button id="update-stock-button" class="btn btn-primary">更新股票</button>
 
     </div>
     <br>
+    <h1 class="centered-title">股票列表</h1>
+
     <div class="filter-container">
 
         <input type="text" id="name-filter" class="filter form-control" placeholder="Name">
@@ -80,9 +108,9 @@
         <select id="industry-filter" class="filter form-control">
             <option value="">Industry</option>
         </select>
-        <select id="market-filter" class="filter form-control">
-            <option value="">Market</option>
-        </select>
+        {#        <select id="market-filter" class="filter form-control">#}
+        {#            <option value="">Market</option>#}
+        {#        </select>#}
 
         <input type="text" id="list-date-filter" class="filter form-control" placeholder="List Date Range">
 
@@ -196,7 +224,7 @@
             'name': $('#name-filter').val(),
             'area': $('#area-filter').val(),
             'industry': $('#industry-filter').val(),
-            'market': $('#market-filter').val(),
+            {#'market': $('#market-filter').val(),#}
             'list_date': $('#list-date-filter').val()
         };
     }
@@ -235,9 +263,9 @@
                     $('#industry-filter').append(response.industry.map(function (item) {
                         return $('<option></option>').val(item).text(item);
                     }));
-                    $('#market-filter').append(response.market.map(function (item) {
-                        return $('<option></option>').val(item).text(item);
-                    }));
+                    //$('#market-filter').append(response.market.map(function (item) {
+                    //  return $('<option></option>').val(item).text(item);
+                    //}));
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error: ' + textStatus + ', ' + errorThrown);
@@ -248,7 +276,7 @@
         ;
     }
 
-    function performCustomAction() {
+    function updateAllStock() {
         $.ajax({
             type: 'GET',
             url: '/stock/actions/updateAllStock/',
@@ -263,14 +291,58 @@
         });
     }
 
+    function predict() {
+        let inputValue = $('#custom-input').val().trim();
+        // 检查输入框的值是否为空或者非数字
+        if (inputValue === '' || isNaN(inputValue)) {
+            inputValue = 5;
+        }
+        $.ajax({
+            type: 'GET',
+            url: '/stock/actions/predict/',
+            data: {
+                'n_step': inputValue
+            },
+            dataType: 'json',
+
+            success: function (response) {
+                // 根据您的需求处理响应数据，例如更新表格等
+                console.log(response);
+
+                // 将响应数据存储到localStorage或sessionStorage中
+                // 以便在predictList.html页面中访问
+                localStorage.setItem('results', JSON.stringify(response.data));
+
+                // 跳转到predictList.html页面
+                window.location.href = '/stock/actions/predictList/';
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+
+
     $(document).ready(function () {
+
+
+
         $('.filter').on('change', function () {
             filterData();
         });
-        // 绑定按钮点击事件
-        $('#custom-action-button').on('click', function () {
-            performCustomAction();
+        // 更新所有股票
+        $('#custom-stock-button').on('click', function () {
+            updateAllStock();
         });
+        // 预测股票
+        $('#predict-stock-button').on('click', function () {
+            //precit
+            const input = document.getElementById('custom-input');
+            const n = input.value;
+            window.location.href =  `/stock/actions/predict?n_step=${n}`;
+        });
+
+
         $('#list-date-filter').daterangepicker({
             autoUpdateInput: false,
             locale: {
