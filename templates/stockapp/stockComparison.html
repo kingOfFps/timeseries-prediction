@@ -1,0 +1,373 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Comparison</title>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <style>
+        .stock-details {
+            padding: 15px;
+            width: 100%;
+        }
+
+        .chart-container {
+            width: 100%;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            overflow-x: hidden; /* 隐藏横向滚动条 */
+        }
+
+        .container-90 {
+            width: 90%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+
+    </style>
+</head>
+<body>
+<br>
+<div class="container-90">
+    <h1>股票对比</h1>
+    <div class="row">
+        <div class="col-md-6">
+            {#        显示第一个下拉框#}
+            <label for="stock1">Stock 1:</label>
+            <select id="stock1" class="form-control">
+                {% for stock in stocks %}
+                    <option value="{{ stock.ts_code }}">{{ stock.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            {#                显示第二个下拉框#}
+            <label for="stock2">Stock 2:</label>
+            <select id="stock2" class="form-control">
+                {% for stock in stocks %}
+                    <option value="{{ stock.ts_code }}">{{ stock.name }}</option>
+                {% endfor %}
+            </select>
+
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <button id="compare-stocks" class="btn btn-primary">对比股票</button>
+            <a href="/stock/" class="btn btn-primary">返回主页</a>
+
+        </div>
+    </div>
+</div>
+
+<div class="container-90 mt-5">
+    <div class="row">
+        <div class="col-lg-6 col-md-12 stock-details" id="stock1-details">
+            <!-- 第一支股票的详情 -->
+            <h1 id="stock-name1"></h1>
+            <table class="table table-striped">
+                <tbody id="stock-data1">
+                </tbody>
+            </table>
+
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px;margin-left: 0px; margin-bottom: 0px">{{ data1.name }}</div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_region1" style="width: 1000px; height: 400px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">MACD
+                    </div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_macd1" style="width: 1000px; height: 500px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">KDJ
+                    </div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_kdj1" style="width: 1000px; height: 500px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">W&M
+                    </div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_wm1" style="width: 1000px; height: 500px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BIAS
+                    </div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_bias1" style="width: 1000px; height: 500px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BOLL
+                    </div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_boll1" style="width: 1000px; height: 500px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12 stock-details" id="stock2-details">
+            <!-- 第二支股票的详情 -->
+            <h1 id="stock-name2"></h1>
+            <table class="table table-striped">
+                <tbody id="stock-data2">
+                </tbody>
+            </table>
+
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">{{ data2.name }}</div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_region2" style="width: 1000px; height: 400px"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">MACD
+                    </div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_macd2" style="width: 1000px; height: 500px"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">KDJ
+                    </div>
+                    <div class="panel-body" style="margin-top: 0px">
+                        <div id="chart_kdj2" style="width: 1000px; height: 500px"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="panel panel-default" style="margin-bottom: 50px">
+                    <div class="panel-heading"
+                         style="font-size: 30px; text-align: center; margin-right: 110px">
+                        <div class=" chart-container">
+                            <div class="panel panel-default" style="margin-bottom: 50px">
+                                <div class="panel-heading"
+                                     style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">
+                                    W&M
+                                </div>
+                                <div class="panel-body" style="margin-top: 0px">
+                                    <div id="chart_wm2" style="width: 1000px; height: 500px"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="panel panel-default" style="margin-bottom: 50px">
+                                <div class="panel-heading"
+                                     style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">
+                                    BIAS
+                                </div>
+                                <div class="panel-body" style="margin-top: 0px">
+                                    <div id="chart_bias2" style="width: 1000px; height: 500px"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="panel panel-default" style="margin-bottom: 50px">
+                                <div class="panel-heading"
+                                     style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">
+                                    BOLL
+                                </div>
+                                <div class="panel-body" style="margin-top: 0px">
+                                    <div id="chart_boll2" style="width: 1000px; height: 500px"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+</body>
+
+<script src="{% static 'js/echarts.min.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+        initLine();
+        var compareBtn = $('#compare-stocks');
+        compareBtn.click(function () {
+            initLine()
+        });
+    })
+
+    function indicatorsOption() {
+        var option = {
+            grid: {
+                {#left: '25%',#}
+                {#top: '20%',#}
+                width: '67%',
+                height: '67%'
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: [],
+                bottom: 0,
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: []
+        };
+        return option;
+    }
+
+    function initLine() {
+        const tsCode1 = $("#stock1").val();
+        const tsCode2 = $("#stock2").val();
+        console.log(tsCode1, tsCode2)
+
+        getStockDataAndRender(tsCode1, 1);
+        getStockDataAndRender(tsCode2, 2);
+    }
+
+    function getStockDataAndRender(tsCode, index) {
+        $.ajax({
+            url: "/stock/actions/getStockData/" + tsCode,
+            type: "GET",
+            dataType: "json",
+            success: function (res) {
+                let data = res.data;
+
+                $("#stock-name" + index).text(data.name + " - " + data.ts_code);
+
+                let tableRows = "";
+                for (let key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        tableRows += `
+                        <tr>
+                            <th>${key}</th>
+                            <td>${data[key]}</td>
+                        </tr>
+                    `;
+                    }
+                }
+
+                $("#stock-data" + index).html(tableRows);
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+
+        const chartIds = [
+            'chart_region', 'chart_macd', 'chart_kdj',
+            'chart_wm', 'chart_bias', 'chart_boll'
+        ];
+
+        const charts = chartIds.map(id => echarts.init(document.getElementById(id + index)));
+        const options = Array(6).fill().map(() => indicatorsOption());
+
+        $.ajax({
+            url: '/stock/chart/line?ts_code=' + tsCode,
+            type: "get",
+            dataType: "JSON",
+            success: function (res) {
+                if (res.status) {
+                    const {legend, x_axis, series_list} = res.data;
+
+                    options.forEach((option, i) => {
+                        option.legend.data = legend.slice(i * 3, (i + 1) * 3);
+                        option.xAxis.data = x_axis;
+                        option.series = series_list.slice(i * 3, (i + 1) * 3);
+                        charts[i].setOption(option);
+                    });
+                }
+            }
+        });
+    }
+
+    var keys = {
+        'ts_code': '股票代码',
+        'name': '名称',
+        'area': '地区',
+        'industry': '行业',
+        'list_date': '日期',
+        'open': '开盘价',
+        'close': '收盘价',
+        'change': '变化率',
+        'vol': '成交量',
+        'amount': '总量'
+    };
+
+    function replaceKeys() {
+        for (var key in keys) {
+            var span = document.getElementById(key);
+            if (span) {
+                span.innerHTML = keys[key];
+            }
+        }
+    }
+
+    replaceKeys();
+</script>
+</html>

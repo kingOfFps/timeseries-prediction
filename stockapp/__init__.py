@@ -15,8 +15,11 @@ df.index.name = 'index'
 config = {
     'add_list': ['open', 'close', 'change', 'vol', 'amount'],  # add_list:将ts_code.csv中的哪些信息加入allStock.csv中
     'page_num': 50,  # stockList.html中每个分页显示的数量
-    'stock_count': 10,  # 用allStock.csv中的多少个股票作为预测对象
+    'predict_stock_count': 10,  # 用allStock.csv中的多少个股票作为预测对象
     'predict_count': 200,  # 打算利用多少天的历史数据来预测
+    'stock_count': 100,  # 打算预测多少支股票
+    'step_in': 3,
+    'n_step': 7,
 }
 
 

@@ -27,94 +27,87 @@
     </style>
 </head>
 <body>
-<h1>{{ data.name }} - {{ data.ts_code }}</h1>
-<table class="table table-striped">
-    <tbody>
+
+    <h1>{{ data.name }} - {{ data.ts_code }}</h1>
+    <table class="table table-striped">
+        <tbody>
+
     {% for key, value in data.items %}
         <tr>
-            <th>{{ key }}</th>
+            <th><span id="{{ key }}">{{ key }}</span></th>
             <td>{{ value }}</td>
         </tr>
     {% endfor %}
-    </tbody>
-</table>
-<a href="/stock/" class="btn btn-primary">Back to Stock List</a>
+        </tbody>
+    </table>
 
-<!-- Add this code snippet after the <a href="/stock/" class="btn btn-primary">Back to Stock List</a> line -->
-<div class="container mt-3" style="margin-bottom: 50px">
-    <div class="row">
-        <div class="col-md-4" style="display: inline-block">
-            <input type="text" id="start-date" class="form-control" value="20130120">
-        </div>
-        <div class="col-md-4" style="display: inline-block">
-            <input type="text" id="end-date" class="form-control" placeholder="End Date (YYYY-MM-DD) " value="20230120">
-        </div>
-        <div class="col-md-4" style="display: inline-block">
-            <button id="update-chart" class="btn btn-primary">Update Chart</button>
+    <a href="/stock/" class="btn btn-primary">返回主页</a>
+    <a href="/stock/actions/predict/{{ data.ts_code }}" class="btn btn-primary">预测股票</a>
+
+    <div class="container">
+        <div class="panel panel-default" style="margin-bottom: 50px">
+            <div class="panel-heading"
+                 style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">{{ data.name }}</div>
+            <div class="panel-body" style="margin-top: 0px">
+                <div id="chart_region" style="width: 1000px; height: 400px"></div>
+            </div>
         </div>
     </div>
-</div>
 
-
-<div class="container">
-    <div class="panel panel-default" style="margin-bottom: 50px">
-        <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">{{ data.name }}</div>
-        <div class="panel-body" style="margin-top: 0px">
-            <div id="chart_region" style="width: 1000px; height: 400px"></div>
+    <div class="container">
+        <div class="panel panel-default" style="margin-bottom: 50px">
+            <div class="panel-heading"
+                 style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">MACD
+            </div>
+            <div class="panel-body" style="margin-top: 0px">
+                <div id="chart_macd" style="width: 1000px; height: 500px"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="container">
-    <div class="panel panel-default" style="margin-bottom: 50px">
-        <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">MACD</div>
-        <div class="panel-body" style="margin-top: 0px">
-            <div id="chart_macd" style="width: 1000px; height: 500px"></div>
+    <div class="container">
+        <div class="panel panel-default" style="margin-bottom: 50px">
+            <div class="panel-heading"
+                 style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">KDJ
+            </div>
+            <div class="panel-body" style="margin-top: 0px">
+                <div id="chart_kdj" style="width: 1000px; height: 500px"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="container">
-    <div class="panel panel-default" style="margin-bottom: 50px">
-        <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">KDJ</div>
-        <div class="panel-body" style="margin-top: 0px">
-            <div id="chart_kdj" style="width: 1000px; height: 500px"></div>
+    <div class="container">
+        <div class="panel panel-default" style="margin-bottom: 50px">
+            <div class="panel-heading"
+                 style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">W&M
+            </div>
+            <div class="panel-body" style="margin-top: 0px">
+                <div id="chart_wm" style="width: 1000px; height: 500px"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="container">
-    <div class="panel panel-default" style="margin-bottom: 50px">
-        <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">W&M</div>
-        <div class="panel-body" style="margin-top: 0px">
-            <div id="chart_wm" style="width: 1000px; height: 500px"></div>
+    <div class="container">
+        <div class="panel panel-default" style="margin-bottom: 50px">
+            <div class="panel-heading"
+                 style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BIAS
+            </div>
+            <div class="panel-body" style="margin-top: 0px">
+                <div id="chart_bias" style="width: 1000px; height: 500px"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="container">
-    <div class="panel panel-default" style="margin-bottom: 50px">
-        <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BIAS</div>
-        <div class="panel-body" style="margin-top: 0px">
-            <div id="chart_bias" style="width: 1000px; height: 500px"></div>
+    <div class="container">
+        <div class="panel panel-default" style="margin-bottom: 50px">
+            <div class="panel-heading"
+                 style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BOLL
+            </div>
+            <div class="panel-body" style="margin-top: 0px">
+                <div id="chart_boll" style="width: 1000px; height: 500px"></div>
+            </div>
         </div>
     </div>
-</div>
-
-<div class="container">
-    <div class="panel panel-default" style="margin-bottom: 50px">
-        <div class="panel-heading"
-             style="font-size: 30px; text-align: center; margin-right: 110px; margin-bottom: 0px">BOLL</div>
-        <div class="panel-body" style="margin-top: 0px">
-            <div id="chart_boll" style="width: 1000px; height: 500px"></div>
-        </div>
-    </div>
-</div>
 
 </body>
 
@@ -123,7 +116,6 @@
     $(function () {
         initLine();
     })
-
     function regionOption() {
         var option = {
 
@@ -160,7 +152,6 @@
         };
         return option;
     }
-
     function indicatorsOption() {
         var option = {
 
@@ -188,14 +179,11 @@
         };
         return option;
     }
-
     function initLine() {
-        var chart_region= echarts.init(document.getElementById('chart_region'));
+        var chart_region = echarts.init(document.getElementById('chart_region'));
         var chart_macd = echarts.init(document.getElementById('chart_macd'));
         var chart_kdj = echarts.init(document.getElementById('chart_kdj'));
         var chart_wm = echarts.init(document.getElementById('chart_wm'));
-        //var chart_rsi = echarts.init(document.getElementById('chart_rsi'));
-        //var chart_dmi = echarts.init(document.getElementById('chart_dmi'));
         var chart_bias = echarts.init(document.getElementById('chart_bias'));
         var chart_boll = echarts.init(document.getElementById('chart_boll'));
 
@@ -203,8 +191,6 @@
         var option_macd = indicatorsOption();
         var option_kdj = indicatorsOption();
         var option_wm = indicatorsOption();
-        //var option_rsi = indicatorsOption();
-        //var option_dmi = indicatorsOption();
         var option_bias = indicatorsOption();
         var option_boll = indicatorsOption();
 
@@ -234,15 +220,6 @@
                     option_wm.xAxis.data = res.data.x_axis;
                     option_wm.series = res.data.series_list.slice(13, 14);
 
-                    // RSI 指标线
-                    //option_wm.legend.data = res.data.legend.slice(14, 15);
-                    //option_wm.xAxis.data = res.data.x_axis;
-                    //option_wm.series = res.data.series_list.slice(14, 15);
-
-                    // DMI 指标线
-                    //option_dmi.legend.data = res.data.legend.slice(15, 18);
-                    //option_dmi.xAxis.data = res.data.x_axis;
-                    //option_dmi.series = res.data.series_list.slice(15, 18);
 
                     // BIAS 指标线
                     option_bias.legend.data = res.data.legend.slice(15, 16);
@@ -259,8 +236,6 @@
                     chart_macd.setOption(option_macd);
                     chart_kdj.setOption(option_kdj);
                     chart_wm.setOption(option_wm);
-                    //chart_rsi.setOption(option_rsi);
-                    //chart_dmi.setOption(option_dmi);
                     chart_bias.setOption(option_bias);
                     chart_boll.setOption(option_boll);
 
@@ -269,54 +244,18 @@
         })
     }
 
-    // Add this code snippet after the initLine() function in your JavaScript code
-    $(document).ready(function () {
-        $('#update-chart').on('click', function () {
-            var startDate = $('#start-date').val();
-            var endDate = $('#end-date').val();
+     var keys = {'ts_code':'股票代码', 'name':'名称', 'area':'地区', 'industry':'行业', 'list_date':'日期', 'open':'开盘价', 'close':'收盘价', 'change':'变化率', 'vol':'成交量', 'amount':'总量'};
 
-            // Validate the date format
-            {#var datePattern = /^\d{4}-\d{2}-\d{2}$/;#}
-            {#if (!startDate.match(datePattern) || !endDate.match(datePattern)) {#}
-            {#    alert("Invalid date format. Please enter date in YYYY-MM-DD format.");#}
-            {#    return;#}
-            {#}#}
-
-                updateLine(startDate, endDate);
-
+    function replaceKeys() {
+        for (var key in keys) {
+            var span = document.getElementById(key);
+            if (span) {
+                span.innerHTML = keys[key];
             }
-        )
-            ;
-        });
-
-        function updateLine(startDate, endDate) {
-            // ... (existing code)
-
-            var queryString = '?ts_code={{ data.ts_code }}';
-            if (startDate && endDate) {
-                queryString += '&start_date=' + startDate + '&end_date=' + endDate;
-            }
-            var option = initOption();
-            var myChart = echarts.init(document.getElementById('m1'));
-
-            $.ajax({
-                url: '/stock/chart/line' + queryString,
-                type: "get",
-                dataType: "JSON",
-                // ... (existing code)
-                success: function (res) {
-                    if (res.status) {
-                        option.legend.data = res.data.legend;
-                        option.xAxis.data = res.data.x_axis;
-                        option.series = res.data.series_list;
-
-                        myChart.setOption(option);
-                    }
-                }
-            });
         }
+    }
 
-
+    replaceKeys();
 </script>
 
 </html>

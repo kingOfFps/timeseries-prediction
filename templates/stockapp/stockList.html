@@ -79,6 +79,18 @@
     </style>
 </head>
 <body>
+<header>
+        <nav>
+{#            <a href="{% url 'home' %}">Home</a>#}
+            {% if user.is_authenticated %}
+                <span>Welcome, {{ user.username }}!</span>
+                <a href="{% url 'logout' %}">注销</a>
+            {% else %}
+                <a href="{% url 'login' %}">登入</a>
+                <a href="{% url 'register' %}">注册</a>
+            {% endif %}
+        </nav>
+    </header>
 <div class="container">
     {#    <div class="custom-header">#}
     {#        <h1 class="centered-title">股票列表</h1>#}
@@ -94,6 +106,8 @@
         <button id="predict-stock-button" class="btn btn-dark">预测股票</button>
 {#        <button id="predict-stock-button" class="btn btn-dark"><a href="/stock/actions/predict">预测股票</a></button>#}
         <button id="update-stock-button" class="btn btn-primary">更新股票</button>
+        <a href="/stock/stock_comparison" class="btn btn-primary">对比股票</a>
+        <a href="/stock/market_index" class="btn btn-primary">大盘指数</a>
 
     </div>
     <br>
@@ -120,9 +134,17 @@
     <table class="table table-striped table-bordered">
         <thead class="thead-dark">
         <tr>
-            {% for key in data.0.keys %}
-                <th>{{ key }}</th>
-            {% endfor %}
+            <th>序号</th>
+            <th>股票代码</th>
+            <th>名称</th>
+            <th>地区</th>
+            <th>行业</th>
+            <th>日期</th>
+            <th>开盘价</th>
+            <th>收盘价</th>
+            <th>变化率</th>
+            <th>成交量</th>
+            <th>总量</th>
         </tr>
         </thead>
         <tbody id="table-body">
@@ -299,7 +321,7 @@
         }
         $.ajax({
             type: 'GET',
-            url: '/stock/actions/predict/',
+            url: '/stock/actions/predict/stocks',
             data: {
                 'n_step': inputValue
             },
@@ -331,7 +353,7 @@
             filterData();
         });
         // 更新所有股票
-        $('#custom-stock-button').on('click', function () {
+        $('#update-stock-button').on('click', function () {
             updateAllStock();
         });
         // 预测股票
@@ -339,7 +361,7 @@
             //precit
             const input = document.getElementById('custom-input');
             const n = input.value;
-            window.location.href =  `/stock/actions/predict?n_step=${n}`;
+            window.location.href =  `/stock/actions/predict/stocks?n_step=${n}`;
         });
 
 

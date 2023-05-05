@@ -1,4 +1,6 @@
-
+import json
+import requests
+import re
 import numpy as np
 import pandas as pd
 
@@ -198,7 +200,76 @@ def calculate_main(data):
     data = RSI(data)
     # data = DMI(data)
     data = BIAS(data)
-    data = OBV(data)
+    # data = OBV(data)
     data = BOLL(data)
 
     return data
+
+
+def shanghai_Index():
+    """上证指数"""
+    url = 'http://yunhq.sse.com.cn:32041/v1/sh1/dayk/000001?callback=jQuery112409538187255818151_1683092007924&begin=-1000&end=-1&period=day&_=1683092007927'
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+        "Referer": "http://www.sse.com.cn/",
+    }
+
+    resp = requests.get(url, headers=headers)
+    # print(resp.text)
+    resp_str = str(resp.text)
+    json_str = resp_str[resp_str.find('{'): -1]
+    data_dict = json.loads(json_str)
+    # print(data_dict)
+    data = data_dict['kline']
+    # print(type(data))  # list
+    resp.close()
+    data = data[-30:]
+
+    legend = ['open','close']
+    sh_x_axis = [item[0] for item in data]
+    sh_x_axis = ','.join(str(date) for date in sh_x_axis)
+    open = {"name": 'open', "type": 'line', "stack": 'Total', 'smooth': True, "data": [item[1] for item in data]}
+    close = {"name": 'close', "type": 'line', "stack": 'Total', 'smooth': True, "data": [item[4] for item in data] }
+    sh_series_list = [open,close]
+    return legend,sh_x_axis,sh_series_list
+
+
+def shenzhen_Index():
+    url = "http://push2his.eastmoney.com/api/qt/stock/kline/get?cb=jQuery112403922808295600082_1683095647627&fields1=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6&fields2=f51%2Cf52%2Cf53%2Cf54%2Cf55%2Cf56%2Cf57%2Cf58%2Cf59%2Cf60%2Cf61&ut=7eea3edcaed734bea9cbfc24409ed989&klt=103&fqt=1&secid=0.399001&beg=0&end=20500000&_=1683095647669"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+        "Referer": "http://quote.eastmoney.com/"
+    }
+
+    resp = requests.get(url, headers=headers)
+    resp_str = resp.text
+
+    # 使用正则表达式匹配JSON字符串
+    json_str = re.search(r'\{.*\}', resp_str).group()
+
+    # 将JSON字符串转换为Python字典
+    data_dict = json.loads(json_str)
+
+    # 获取kline数据
+    data = data_dict['data']['klines']
+    # print(type(kline_data))
+    # print(kline_data)
+    resp.close()
+    data = data[-30:]
+
+
+    legend = ['open','close']
+    open_list = []
+    close_list = []
+    x_axis_list =[]
+    for item in data:
+        temp = item.split(',')
+        x_axis_list.append(temp[0])
+        open_list.append(temp[1])
+        close_list.append(temp[4])
+    x_axis_list = ','.join(str(date) for date in x_axis_list)
+    open = {"name": 'open', "type": 'line', "stack": 'Total', 'smooth': True, "data": open_list}
+    close = {"name": 'close', "type": 'line', "stack": 'Total', 'smooth': True, "data": close_list}
+    sh_series_list = [open,close]
+    return legend,x_axis_list,sh_series_list

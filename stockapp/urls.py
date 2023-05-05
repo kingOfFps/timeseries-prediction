@@ -12,11 +12,17 @@ urlpatterns = [
     path('stock/filter_data/', views.filter_data, name='filter_data'),
     path('stock/filter_options/', views.filter_options, name='filter_options'),
 
+
     path("stock/chart/line/", views.chart_line),
+    path("stock/chart/marketline/", views.market_line),
 
     path("stock/actions/updateAllStock/", views.updateAllStock),
-    path("stock/actions/predict/", views.predict),
+    path("stock/actions/predict/stocks", views.predictStockList),
+    path("stock/actions/predict/<str:ts_code>", views.predictSingleStock),
+    path("stock/actions/getStockData/<str:ts_code>", views.getStockData),
 
+    path('stock/stock_comparison/', views.stock_comparison, name='stock_comparison'),
+    path('stock/market_index/', views.market_index, name='market_index'),
     path('stock/<str:ts_code>/', views.stock_detail, name='stock_detail'),
 
 

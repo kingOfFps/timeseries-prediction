@@ -15,6 +15,19 @@
     </style>
 </head>
 <body>
+
+<header>
+        <nav>
+{#            <a href="{% url 'home' %}">Home</a>#}
+            {% if user.is_authenticated %}
+                <span>Welcome, {{ user.username }}!</span>
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Register</a>
+            {% endif %}
+        </nav>
+    </header>
     <div class="container">
         <h1 class="text-center mb-4">预测股票收益</h1>
         <table class="table table-hover table-bordered">
