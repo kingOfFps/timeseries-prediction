@@ -79,32 +79,22 @@
     </style>
 </head>
 <body>
-<header>
-        <nav>
-{#            <a href="{% url 'home' %}">Home</a>#}
-            {% if user.is_authenticated %}
-                <span>Welcome, {{ user.username }}!</span>
-                <a href="{% url 'logout' %}">注销</a>
-            {% else %}
-                <a href="{% url 'login' %}">登入</a>
-                <a href="{% url 'register' %}">注册</a>
-            {% endif %}
-        </nav>
-    </header>
+{#<header>#}
+{#        <nav>#}
+{#            {% if user.is_authenticated %}#}
+{#                <span>Welcome, {{ user.username }}!</span>#}
+{#                <a href="{% url 'logout' %}">注销</a>#}
+{#            {% else %}#}
+{#                <a href="{% url 'login' %}">登入</a>#}
+{#                <a href="{% url 'register' %}">注册</a>#}
+{#            {% endif %}#}
+{#        </nav>#}
+{#    </header>#}
 <div class="container">
-    {#    <div class="custom-header">#}
-    {#        <h1 class="centered-title">股票列表</h1>#}
-    {#        <button id="custom-action-button" class="btn btn-primary">更新股票(耗时)</button>#}
-    {#        <button id="predict-action-button" class="btn btn-primary">预测股票(耗时)</button>#}
-    {##}
-    {#    </div>#}
     <div class="input-button-container">
         <input type="text" id="custom-input" class="form-control custom-input-width"
                placeholder="输入预测天数(不要超过7，否则效果差。且预测和更新都非常耗时)" value=3>
-        {#        <a href="/stock/" class="btn btn-primary">Back to Stock List</a>#}
-
-        <button id="predict-stock-button" class="btn btn-dark">预测股票</button>
-{#        <button id="predict-stock-button" class="btn btn-dark"><a href="/stock/actions/predict">预测股票</a></button>#}
+{#        <button id="predict-stock-button" class="btn btn-dark">预测股票</button>#}
         <button id="update-stock-button" class="btn btn-primary">更新股票</button>
         <a href="/stock/stock_comparison" class="btn btn-primary">对比股票</a>
         <a href="/stock/market_index" class="btn btn-primary">大盘指数</a>
@@ -115,18 +105,14 @@
 
     <div class="filter-container">
 
-        <input type="text" id="name-filter" class="filter form-control" placeholder="Name">
+        <input type="text" id="name-filter" class="filter form-control" placeholder="搜索股票">
         <select id="area-filter" class="filter form-control">
-            <option value="">Area</option>
+            <option value="">地区</option>
         </select>
         <select id="industry-filter" class="filter form-control">
-            <option value="">Industry</option>
+            <option value="">行业</option>
         </select>
-        {#        <select id="market-filter" class="filter form-control">#}
-        {#            <option value="">Market</option>#}
-        {#        </select>#}
-
-        <input type="text" id="list-date-filter" class="filter form-control" placeholder="List Date Range">
+        <input type="text" id="list-date-filter" class="filter form-control" placeholder="日期筛选">
 
     </div>
 

@@ -1,8 +1,8 @@
 import json
-import requests
-import re
 import numpy as np
 import pandas as pd
+import re
+import requests
 
 
 def MACD(data, fast=12, slow=26, signal=9):

@@ -13,9 +13,10 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <h2 class="mt-4">股票预测</h2>
-
+            <h1 class="mt-4">股票预测</h1><br>
+            <h3 class=" center"> 明日股价、股价区间、股价走势预测</h3>
             <div id="stock-chart" style="width:100%; height:400px;"></div>
+            <h3 class="center"> 涨跌幅预测</h3>
             <div id="change-chart" style="width:100%; height:400px;"></div>
         </div>
                                 <a href="/stock/" class="btn btn-primary">返回主页</a>
@@ -44,6 +45,7 @@
         },
         legend: {
             data: ['high', 'low', 'close']
+            {#data: ['最高价', '最低价', '收盘价']#}
         },
         xAxis: {
             type: 'category',
@@ -81,6 +83,7 @@
         },
         legend: {
             data: ['change']
+            {#data: ['变化率']#}
         },
         xAxis: {
             type: 'category',

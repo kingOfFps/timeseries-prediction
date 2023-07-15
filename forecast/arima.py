@@ -1,14 +1,14 @@
+import itertools
+import joblib
+import matplotlib.pyplot as plt
+import numpy as np
 import os.path
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from statsmodels.tsa.stattools import adfuller as ADF
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import statsmodels.api as sm
-import itertools
 import warnings
-import joblib
 from forecast.utils import *
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.stattools import adfuller as ADF
 
 
 def confirm_p_q(data):
@@ -20,14 +20,13 @@ def confirm_p_q(data):
     return AIC
 
 
-
-def forecast(data,n_step):
-    # data = pd.Series(np.array(data[:,-1]), index=data['datetime'])
+def forecast(data, n_step):
     order = confirm_p_q(data)
     model = sm.tsa.ARIMA(data, order=(order[0], 1, order[1]))
     model = model.fit()
     pred = model.forecast(n_step)
     return pred
+
 
 if __name__ == "__main__":
     n_step = 7

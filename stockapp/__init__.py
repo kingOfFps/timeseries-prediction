@@ -1,13 +1,14 @@
-import tushare as ts
 import pandas as pd
+import tushare as ts
 
 """
 在项目最开始运行的适合，创建如下对象，作为全局变量
 pro:股票数据接口； df:所有股票的简要信息
-
-
+tushare官网：https://www.tushare.pro/
 """
-pro = ts.pro_api('169295a1bc79995da8eaf9630b5d7f0c868c021ba5b9ed3cc6d8df1b')
+api_token = '换成你自己的tushare api'
+pro = ts.pro_api(api_token)
+
 df = pd.read_csv('data/allStock.csv').drop('symbol', axis=1)
 df.index.name = 'index'
 
@@ -28,15 +29,12 @@ def fun():
     import time
     startTime = time.time()
     code = '600000.SH'
-    pro = ts.pro_api('169295a1bc79995da8eaf9630b5d7f0c868c021ba5b9ed3cc6d8df1b')
+    pro = ts.pro_api(api_token)
     df = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
     df.to_csv('allStock.csv')
     # 获取股票数据
     # stock_df = pro.daily_basic(ts_code=code)  #这个接口积分不够，无法调用
     # stock_df = pro.daily(ts_code=code, start_date='20190120')
     # stock_df.to_csv(f'../data/{code}.csv',index=False)
-
     print(time.time() - startTime)
 
-# fun()
-# pro,df = None,None

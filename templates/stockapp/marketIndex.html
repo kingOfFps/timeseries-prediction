@@ -58,11 +58,12 @@ h1, h2 {
                 var sz_x_axis = data.sz_x_axis;
                 var sz_series_list = data.sz_series_list;
 
-
+                var legend = ['open','close']
                 var chart1 = echarts.init(document.getElementById('chart1'));
                 var option1 = {
                     legend: {
-                        data: sh_legend,
+                        {#data: sh_legend,#}
+                        data: legend,
                         bottom: 0,
                     },
                     tooltip: {
@@ -82,7 +83,8 @@ h1, h2 {
                 var chart2 = echarts.init(document.getElementById('chart2'));
                 var option2 = {
                     legend: {
-                        data: sz_legend,
+                        {#data: sz_legend,#}
+                        data: legend,
                         bottom: 0,
                     },
                     tooltip: {

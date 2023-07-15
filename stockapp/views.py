@@ -1,19 +1,18 @@
-import time
-from django.contrib.auth.decorators import login_required
-
-from django.core.paginator import Paginator
 import datetime
-import locale
-import json
-import joblib
-from django.shortcuts import render
-from . import *
-from django.http import JsonResponse
-from datetime import datetime, timedelta
-
-import forecast.lstm_single as lstm
 import forecast.lstm_mutiple as lstm_mutiple
+import forecast.lstm_single as lstm
+import joblib
+import json
+import locale
+import time
+from datetime import datetime, timedelta
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.shortcuts import render
 from stockapp.calculate_indicators import *
+
+from . import *
 
 
 # @login_required(login_url='/login/')
@@ -191,6 +190,9 @@ def filter_data(request):
                     end_date = int(end_date.replace('-', ''))
                     filtered_data = filtered_data[
                         (filtered_data[column] >= start_date) & (filtered_data[column] <= end_date)]
+                elif column == 'name':
+                    filtered_data = filtered_data[
+                        filtered_data[column].str.contains(value) | filtered_data['ts_code'].str.contains(value)]
                 else:
                     filtered_data = filtered_data[filtered_data[column].str.contains(value)]
         data = filtered_data.to_dict(orient='records')
@@ -206,7 +208,7 @@ def filter_data(request):
             'data': list(page_data.object_list),
             'number': page_data.number,
             'has_previous': page_data.has_previous(),
-            'has_next': page_data.hFas_next(),
+            'has_next': page_data.has_next(),
             'previous_page_number': page_data.previous_page_number() if page_data.has_previous() else None,
             'next_page_number': page_data.next_page_number() if page_data.has_next() else None,
             'start_index': page_data.start_index(),
@@ -232,7 +234,7 @@ def predictStockList(request):
     results = []
     for ts_code in df.loc[:config['predict_stock_count'], 'ts_code'].to_list():
         dic = {'ts_code': None, 'name': None, 'open': None, 'close': None, 'change': None, 'earn': None}
-        data = pd.read_csv(f'../data/{ts_code}.csv')
+        data = pd.read_csv(f'data/{ts_code}.csv')
         count = min(config['predict_count'], data.shape[0])
         # 获取部分数据并反转顺序
         data = data.iloc[:count, :].iloc[::-1]
@@ -315,17 +317,18 @@ def stock_comparison(request):
 
 
 def market_index(request):
-    return render(request,'stockapp/marketIndex.html')
+    return render(request, 'stockapp/marketIndex.html')
+
 
 def market_line(request):
-    sh_legend,sh_x_axis,sh_series_list = shanghai_Index()
-    sz_legend,sz_x_axis,sz_series_list = shenzhen_Index()
+    sh_legend, sh_x_axis, sh_series_list = shanghai_Index()
+    sz_legend, sz_x_axis, sz_series_list = shenzhen_Index()
     sh_x_axis = sh_x_axis.split(',')
     sz_x_axis = sz_x_axis.split(',')
     context = {
-        'sh_legend':sh_legend ,
+        'sh_legend': sh_legend,
         'sh_x_axis': sh_x_axis,
-        'sh_series_list':sh_series_list,
+        'sh_series_list': sh_series_list,
 
         'sz_legend': sz_legend,
         'sz_x_axis': sz_x_axis,
@@ -334,168 +337,3 @@ def market_line(request):
 
     return JsonResponse(context)
 
-"""
-需求阐述：
-predictSingStock 需求参数：
-我现在有股票的dataframe数据，数据示例：“,ts_code,trade_date,open,high,low,close,pre_close,change,pct_chg,vol,amount
-0,000001.SZ,20230424,12.48,12.5,12.03,12.1,12.5,-0.4,-3.2,1467671.92,1798133.967”。我需要
-基于keras建立LSTM模型来预测其中的high,low,close,change这4列数据。lstm的训练以及预测过程中，不需要切分训练集和测试集，把所有的历史数据作为训练模型的数据，
-然后根据参数n_step来迭代预测未来n_step天的数据。要求给出的代码大体分为predict(n_step)、train(trainData)两个函数。其中train负责训练、保存模型,
-predict负责读取模型、按照n_step进行迭代预测。
-
-我有股票dataframe数据，示例如下：“,ts_code,trade_date,open,high,low,close,pre_close,change,pct_chg,vol,amount
-0,000001.SZ,20230428,12.26,12.78,12.22,12.55,12.26,0.29,2.3654,1445254.34,1816868.033”。
-在django中，我已经利用lstm在view函数predictSingleStock中预测出了high,low,close,change未来7天的值。我现在需要把历史数据和预测
-出来的数据拼接起来，传到stockSingPredict.html中的echats展示。要求将high,low,close放在同一个echats中，change单独放一个echats。
-预测的值和历史数据用不同的颜色显示出来,echats的横坐标是dataframe的index，也就是数据对应的日期。整个页面基于bootstrap4开发，要美观。
-我的
-
-
-
-在django框架中，我现在有dataframe数据，部分数据展示：“,ts_code,trade_date,open,high,low,close,pre_close,change,pct_chg,vol,amount
-0,600000.SH,20230418,7.38,7.59,7.37,7.54,7.39,0.15,2.0298,774123.35,582499.848”，
-我需要一个view函数来将dataframe传递给stockList.html来展示数据。需要另一个view函数来处理stockList.html对展示的dataframe数据进行的筛选操作，
-按照前端发来的异步请求筛选对应的dataframe数据，并返回给stockList.html展示。
-要求：请帮我基于Bootstrap4和Django3开发出美观的html页面，用表格在stockList.html来展示这些dataframe数据，并在页面中为dataframe的每一列加上筛选操作。
-并且将每行的‘ts_code’列写成超链接的形式，链接形式：“/stock/{ts_code}”，来跳转到stockDetail.html页面。stockDetail.html根据超链接中的{ts_code}展示某行dataframe的详细信息。
-请帮我编写如下代码：3个view函数，分别用于在stockList.html展示dataframe、筛选dataframe、跳转到dataframe行对应的stockDetail.html。
-stockList.html,stockDetail.html。js直接写入html文件中，不要单独写成一个js文件。html一定要美观好看。
-
-
-我希望：1 stockList.html的数据列表中，name、area、industry、market的筛选方式是下拉框而不是输入框。并且所有下拉框的值是通过一个异步接口获取到的，
-步骤就是在view函数中对对应dataframe列的值进行去重操作，去重后的值就是对应列的下拉框值。
-2. list_date的筛选方式通过前端的日期组件来选择开始日期和和结束日期而不是输入框。
-3. stockList.html的数据列表太宽，stockDetail也不够漂亮，基于bootstrap4帮我美化他们
-
-
-django项目中，我打算把view函数market_line(request) 中获取的2组数据传递到marketIndex.html中，用两个echarts显示出来。view代码：“def market_line(request):
-    sh_legend,sh_x_axis,sh_series_list = shanghai_Index()
-    sz_legend,sz_x_axis,sz_series_list = shenzhen_Index()
-    context = {
-        'sh_legend':sh_legend ,
-        'sh_x_axis': sh_x_axis,
-        'sh_series_list':sh_series_list,
-
-        'sz_legend': sz_legend,
-        'sz_x_axis': sz_x_axis,
-        'sz_series_list': sz_series_list,
-    }
-    return JsonResponse(context)”，html代码：“{% load static %}
-{% load bootstrap4 %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="{% static 'js/jquery.min.js' %}"></script>
-
-</head>
-<body>
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <div id="chart1" style="width: 100%; height: 400px;"></div>
-        </div>
-        <div class="col-md-6">
-            <div id="chart2" style="width: 100%; height: 400px;"></div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.2.1/echarts.min.js"></script>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-        $.ajax({
-            url: "/stock/chart/marketline/",  // 这里要修改成你的路由
-            type: "GET",
-            dataType: "json",
-            success: function (data) {
-                console.log(data)
-                {#var sh_legend = JSON.parse(data.sh_legend);#}
-                {#var sh_x_axis = JSON.parse(data.sh_x_axis);#}
-                {#var sh_series_list = JSON.parse(data.sh_series_list);#}
-                {#var sz_legend = JSON.parse(data.sz_legend);#}
-                {#var sz_x_axis = JSON.parse(data.sz_x_axis);#}
-                {#var sz_series_list = JSON.parse(data.sz_series_list);#}
-
-                var sh_legend = JSON.stringify(data.sh_legend);
-                var sh_x_axis = JSON.stringify(data.sh_x_axis);
-                var sh_series_list = JSON.stringify(data.sh_series_list);
-                var sz_legend = JSON.stringify(data.sz_legend);
-                var sz_x_axis = JSON.stringify(data.sz_x_axis);
-                var sz_series_list = JSON.stringify(data.sz_series_list);
-
-                var chart1 = echarts.init(document.getElementById('chart1'));
-                var option1 = {
-                    legend: {
-                        data: sh_legend,
-                        bottom: 0,
-                    },
-                    tooltip: {
-                        trigger: 'axis'
-                    },
-                    xAxis: {
-                        type: 'category',
-                        //data: sh_x_axis.map(function (item) {
-                        //  return item[0];
-                        //})
-                        data: sh_x_axis
-                    },
-                    yAxis: {
-                        type: 'value'
-                    },
-                    series: [{
-                        data: sh_series_list,
-                        //data: sh_series_list.map(function (item) {
-                          //  return item[1];
-                        //}),
-                        type: 'line',
-                        smooth: true
-                    }]
-                };
-                chart1.setOption(option1);
-
-                var chart2 = echarts.init(document.getElementById('chart2'));
-                var option2 = {
-                    legend: {
-                        data: sz_legend,
-                        bottom: 0,
-                    },
-                    tooltip: {
-                        trigger: 'axis'
-                    },
-                    xAxis: {
-                        type: 'category',
-                        //data: sz_x_axis.map(function (item) {
-                        //  return item.split(',')[0];
-                        //})
-                        data: sh_x_axis
-
-                    },
-                    yAxis: {
-                        type: 'value'
-                    },
-                    series: [{
-                        data: sz_series_list,
-                        //data: sz_series_list.map(function (item) {
-                          //  return item.split(',')[1];
-                        //}),
-                        type: 'line',
-                        smooth: true
-                    }]
-                };
-                chart2.setOption(option2);
-            },
-            error: function () {
-                alert("Failed to get data.");
-            }
-        });
-    });
-</script>
-
-</body>
-</html>” view中的数据示例：sh_legend=['open', 'close'],   sh_x_axis = '20230321,20230322,20230323,20230324',  sh_series_list = [({'name': 'open', 'type': 'line', 'stack': 'Total', 'smooth': True, 'data': [3240.838, 3263.412, 3258.779, 3282.739, 3261.823, 3256.602, 3253.621, 3243.068, 3263.406, 3277.34, 3297.183, 3302.751, 3312.481, 3331.505, 3317.077, 3316.862, 3321.273, 3326.37, 3337.06, 3379.226, 3391.354, 3367.052, 3363.998, 3300.812, 3276.403, 3255.217, 3256.227, 3283.122, 3306.482, 3350.6538]},), ({'name': 'close', 'type': 'line', 'stack': 'Total', 'smooth': True, 'data': [3255.65, 3265.747, 3286.649, 3265.653, 3251.397, 3245.376, 3240.056, 3261.248, 3272.86, 3296.396, 3312.557, 3312.628, 3327.645, 3315.357, 3313.57, 3327.181, 3318.363, 3338.152, 3385.609, 3393.331, 3370.128, 3367.031, 3301.257, 3275.413, 3264.871, 3264.1, 3285.884, 3323.274, 3350.458, 3354.1749]},)]  。现在运行，前端页面得不到想要的效果，echats显示的x和y都有问题，帮我检查
-"""

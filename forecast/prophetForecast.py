@@ -1,7 +1,8 @@
 import pandas as pd
+from forecast.utils import *
 # from fbprophet import Prophet
 from prophet import Prophet
-from forecast.utils import *
+
 
 def forecast(data, steps_to_predict):
     data['trade_date'] = pd.to_datetime(data['trade_date'], format='%Y%m%d')

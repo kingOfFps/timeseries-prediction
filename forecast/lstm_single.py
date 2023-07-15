@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from keras.models import Sequential
-from keras.layers import LSTM, Dense
-from sklearn.preprocessing import MinMaxScaler
 from forecast.utils import *
 from keras.layers import Bidirectional
+from keras.layers import LSTM, Dense
+from keras.models import Sequential
+from sklearn.preprocessing import MinMaxScaler
 
 
 def create_dataset(dataset, look_back=1):
@@ -16,16 +16,13 @@ def create_dataset(dataset, look_back=1):
     return np.array(dataX), np.array(dataY)
 
 
-
-
-
 def forecast(data, n_step):
     data['trade_date'] = pd.to_datetime(data['trade_date'], format='%Y%m%d')
     data.set_index('trade_date', inplace=True)
     data.sort_index(inplace=True)
 
     # 使用开盘价、最高价、最低价和收盘价
-    features = data[['open', 'high', 'low', 'pre_close','change','pct_chg','vol','amount', 'close']].values
+    features = data[['open', 'high', 'low', 'pre_close', 'change', 'pct_chg', 'vol', 'amount', 'close']].values
 
     X, y = features[:, :-1], features[:, -1:]
     # 数据归一化
@@ -77,12 +74,10 @@ def predict(model, input_data, step):
     return predictions
 
 
-
-
 if __name__ == "__main__":
     n_step = 10
     count = 30
-    data = pd.read_csv('../data/000001.SZ.csv').iloc[:count,:]
+    data = pd.read_csv('../data/000001.SZ.csv').iloc[:count, :]
     # 将data反转，使其按照时间顺序排列
     data = data.iloc[::-1]
     # plt.plot(data.loc[:200,['close']])
@@ -95,15 +90,3 @@ if __name__ == "__main__":
     evaluate(test_data['close'], pred)
     showTruePred(test_data['close'], pred)
 
-"""
-n_step=14
-300
-Test RMSE: 0.27
-Test MAPE: 1.77
-皮尔森系数0.44
-决定系数-0.58
-
-
-
-
-"""
