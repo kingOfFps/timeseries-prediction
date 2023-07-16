@@ -128,7 +128,6 @@ def DMI(data, n=14, m=14):
     data['DI-'].fillna(method='bfill', inplace=True)
     data['ADX'] = adx
     data['ADX'].fillna(method='bfill', inplace=True)
-
     return data
 
 
@@ -166,7 +165,6 @@ def OBV(data):
             obv[i] = obv[i-1]
     data['OBV'] = obv
     data['OBV'].fillna(method='bfill', inplace=True)
-
     return data
 
 
@@ -189,7 +187,6 @@ def BOLL(data, n=20, k=2):
     data['BOLL_UPPER'].fillna(method='bfill', inplace=True)
     data['BOLL_LOWER'] = down
     data['BOLL_LOWER'].fillna(method='bfill', inplace=True)
-
     return data
 
 
@@ -202,7 +199,6 @@ def calculate_main(data):
     data = BIAS(data)
     # data = OBV(data)
     data = BOLL(data)
-
     return data
 
 
@@ -214,7 +210,6 @@ def shanghai_Index():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
         "Referer": "http://www.sse.com.cn/",
     }
-
     resp = requests.get(url, headers=headers)
     # print(resp.text)
     resp_str = str(resp.text)
@@ -225,7 +220,6 @@ def shanghai_Index():
     # print(type(data))  # list
     resp.close()
     data = data[-30:]
-
     legend = ['open','close']
     sh_x_axis = [item[0] for item in data]
     sh_x_axis = ','.join(str(date) for date in sh_x_axis)
@@ -241,24 +235,18 @@ def shenzhen_Index():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
         "Referer": "http://quote.eastmoney.com/"
     }
-
     resp = requests.get(url, headers=headers)
     resp_str = resp.text
-
     # 使用正则表达式匹配JSON字符串
     json_str = re.search(r'\{.*\}', resp_str).group()
-
     # 将JSON字符串转换为Python字典
     data_dict = json.loads(json_str)
-
     # 获取kline数据
     data = data_dict['data']['klines']
     # print(type(kline_data))
     # print(kline_data)
     resp.close()
     data = data[-30:]
-
-
     legend = ['open','close']
     open_list = []
     close_list = []

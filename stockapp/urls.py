@@ -26,12 +26,9 @@ urlpatterns = [
 
 
 """
-
-
 基于keras用LSTM实现股票收盘价的预测，数据格式如下：“,ts_code,trade_date,open,high,low,close,pre_close,change,pct_chg,vol,amount
 0,600000.SH,20230418,7.38,7.59,7.37,7.54,7.39,0.15,2.0298,774123.35,582499.848”
 预测的时候用到特征：“open,high,low,close,pre_close,change,pct_chg,vol,amount”。
-
 """
 
 

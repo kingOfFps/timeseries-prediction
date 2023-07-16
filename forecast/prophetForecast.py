@@ -1,6 +1,5 @@
 import pandas as pd
 from forecast.utils import *
-# from fbprophet import Prophet
 from prophet import Prophet
 
 
