@@ -1,8 +1,7 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 import random
 import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def init():
@@ -70,11 +69,7 @@ def rmpe(y_true, y_pred):
 
 # 计算各种评价指标
 def evaluate(yTrue, yPredict):
-    # yTrue = yTrue.reshape(-1)
-    yTrue = np.array(yTrue)
-    yPredict = np.array(yPredict)
-
-
+    yTrue = yTrue.reshape(-1)
     yPredict = yPredict.reshape(-1)
     from sklearn.metrics import mean_squared_error, r2_score
     from scipy.stats import pearsonr
@@ -108,29 +103,8 @@ def evaluate2(yTrue, yPredict):
     return result
 
 
-def showTrain(history):
-    # 展示训练过程
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper right')
+def showTruePred(yTrue, yPredict):
+    plt.plot(yTrue, label='yTrue')
+    plt.plot(yPredict, label='yPred')
+    plt.legend()
     plt.show()
-
-def showTruePred(yTrue:pd.DataFrame, yPredict):
-    if yTrue.shape[1]>1:
-        nameList = yTrue.columns
-        for i,colName in enumerate(nameList):
-            plt.plot(yTrue.loc[:,colName].values, label=f'yTrue-{nameList[i]}')
-            plt.plot(yPredict[:,i], label=f'yPre-{nameList[i]}')
-            plt.legend()
-            plt.show()
-    else:
-        yTrue = np.array(yTrue)
-        plt.plot(yTrue, label='yTrue')
-        plt.plot(yPredict, label='yPre')
-        plt.legend()
-        plt.show()
-
-

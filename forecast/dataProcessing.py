@@ -1,10 +1,10 @@
-import joblib
 import numpy as np
+import joblib
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
-def getData(filePath:str):
+def getData(filePath: str):
     if filePath.endswith('.csv'):
         data = pd.read_csv(filePath)
     elif filePath.endswith('.xlsx') or filePath.endswith('.xls'):
@@ -16,9 +16,10 @@ def getData(filePath:str):
     # 数据过大，为了节省时间，只取前5000个数据
     # data = data.iloc[:2000, ]
     print(data.shape)
-    return data.iloc[:500,:]
+    return data.iloc[:500, :]
 
-def getData1(filePath:str):
+
+def getData1(filePath: str):
     """和getData()差不多，不过是针对标签在datatime列之后、序列之前的数据集"""
     if filePath.endswith('.csv'):
         data = pd.read_csv(filePath)
@@ -35,7 +36,8 @@ def getData1(filePath:str):
     # 数据过大，为了节省时间，只取前5000个数据
     # data = data.iloc[:2000, ]
     print(data.shape)
-    return data.iloc[:500,:]
+    return data.iloc[:500, :]
+
 
 def prepare_data(X, y, stepIn, stepOut):
     """数据预处理函数，将普通数据转化为LSTM能训练学习的监督学习格式的数据"""
@@ -48,6 +50,7 @@ def prepare_data(X, y, stepIn, stepOut):
             newy.append(y[i + stepIn:i + stepIn + stepOut, ])
     return np.array(newX), np.array(newy)
 
+
 def prepare_y(y, stepIn, stepOut):
     """和prepare_data相似，prepare_data处理的是多特征的数据集。此函数处理的是只含有标签y的数据集"""
     """stepIn:滑动窗口的大小，也就是打算一次用step个数据来预测stepOut个数据，"""
@@ -55,8 +58,9 @@ def prepare_y(y, stepIn, stepOut):
     for i in range(y.shape[0] - stepIn - stepOut):
         """用x[i]~x[i+step-1]来预测y[i+step]"""
         newX.append(y[i:i + stepIn])
-        newy.append(y[i + stepIn:i + stepIn + stepOut,-1])
+        newy.append(y[i + stepIn:i + stepIn + stepOut])
     return np.array(newX), np.array(newy)
+
 
 # 把数据集切分成训练集，测试集
 def splitTrainTest(values, ration):
@@ -84,10 +88,11 @@ def spliteAndNormalizeXy(trainXy, testXy):
 
 def spliteAndNormalizeY(trainy, testy):
     """对单维度及归一化"""
-    """归一化：归一化放在数据预处理之后、预测之前是最科学的。因为这样保证了归一化的操作数据，是经过异常处理的相对正常数据"""
+    """归一化：归一化放在数据预处理之后、预测之前是最科学的。
+    因为这样保证了归一化的操作数据，是经过异常处理的相对正常数据"""
     scaler = MinMaxScaler()
     trainy = scaler.fit_transform(trainy)
-    # 对测试集testy归一化需要使用训练集的归一化对应的相关参数。因此使用的是transform(),而不需要使用fit_transform()
+    # 对测试集testy归一化需要使用训练集的归一化对应的相关参数。
+    # 因此使用的是transform(),而不需要使用fit_transform()
     testy = scaler.transform(testy)
-    # joblib.dump(scaler, f'../model/scaler/lstm_scaler.pkl')
     return trainy, testy, scaler
