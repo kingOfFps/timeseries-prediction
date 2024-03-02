@@ -6,7 +6,8 @@ import tushare as ts
 pro:股票数据接口； df:所有股票的简要信息
 tushare官网：https://www.tushare.pro/
 """
-api_token = '换成你自己的tushare api'
+# api_token = '换成你自己的tushare api'
+api_token = '169295a1bc79995da8eaf9630b5d7f0c868c021ba5b9ed3cc6d8df1b'
 pro = ts.pro_api(api_token)
 
 df = pd.read_csv('data/allStock.csv').drop('symbol', axis=1)
